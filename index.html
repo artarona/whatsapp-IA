@@ -340,6 +340,52 @@
         .filter-group select:focus {
             outline: none;
             border-color: #232deb;
+            box-shadow: 0 0 0 3px rgba(35, 45, 235, 0.1);
+        }
+
+        .filter-group input:not(:empty),
+        .filter-group select:not([value=""]) {
+            border-color: #232deb;
+            background-color: rgba(35, 45, 235, 0.02);
+        }
+
+        .filter-active {
+            border-color: #28a745 !important;
+            background-color: rgba(40, 167, 69, 0.02) !important;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #232deb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a1db4;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #495057;
+            border: 2px solid #e1e5e9;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            border-color: #232deb;
+            color: #232deb;
         }
 
         .search-stats {
@@ -563,6 +609,58 @@
         let chatHistory = [];
         let isTyping = false;
 
+        // Event listeners para filtros
+        function addFilterEventListeners() {
+            const filters = ['barrio-select', 'tipo-select', 'operacion-select', 'precio-min', 'precio-max', 'ambientes-min'];
+            
+            filters.forEach(filterId => {
+                const element = document.getElementById(filterId);
+                if (element) {
+                    element.addEventListener('change', function() {
+                        updateFilterVisualFeedback();
+                    });
+                    
+                    // Para inputs numéricos, también escuchar entrada de teclado
+                    if (element.type === 'number') {
+                        element.addEventListener('input', function() {
+                            updateFilterVisualFeedback();
+                        });
+                    }
+                }
+            });
+        }
+
+        // Actualizar feedback visual de filtros activos
+        function updateFilterVisualFeedback() {
+            const filters = {
+                'barrio-select': 'barrio-select',
+                'tipo-select': 'tipo-select',
+                'operacion-select': 'operacion-select',
+                'precio-min': 'precio-min',
+                'precio-max': 'precio-max',
+                'ambientes-min': 'ambientes-min'
+            };
+            
+            Object.keys(filters).forEach(filterId => {
+                const element = document.getElementById(filterId);
+                if (element) {
+                    let isActive = false;
+                    
+                    if (element.type === 'number') {
+                        isActive = element.value && element.value.trim() !== '';
+                    } else {
+                        isActive = element.value && element.value.trim() !== '';
+                    }
+                    
+                    if (isActive) {
+                        element.classList.add('filter-active');
+                    } else {
+                        element.classList.remove('filter-active');
+                    }
+                }
+            });
+        }
+
         // Cargar propiedades al inicializar
         async function loadProperties() {
             try {
@@ -589,6 +687,13 @@
                     option.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
                     tipoSelect.appendChild(option);
                 });
+
+                // Event listeners para mejorar la experiencia de filtros
+                addFilterEventListeners();
+                
+                // Mostrar mensaje inicial
+                showMessage(`¡Hola! 👋 Te ayudo a encontrar tu propiedad ideal. Actualmente tengo ${allProperties.length} propiedades disponibles.`, false);
+                showMessage('🔍 Puedes buscar por texto libre o usar la búsqueda avanzada de abajo.', false);
                 
             } catch (error) {
                 console.error('Error cargando propiedades:', error);
@@ -1006,31 +1111,70 @@
 
         function advancedSearch() {
             const filters = {
-                barrios: [document.getElementById('barrio-select').value],
-                tipos: [document.getElementById('tipo-select').value],
-                operaciones: [document.getElementById('operacion-select').value],
-                precio_min: parseInt(document.getElementById('precio-min').value) || null,
-                precio_max: parseInt(document.getElementById('precio-max').value) || null,
-                ambientes_min: parseInt(document.getElementById('ambientes-min').value) || null,
+                barrios: [],
+                tipos: [],
+                operaciones: [],
+                precio_min: null,
+                precio_max: null,
+                ambientes_min: null,
                 amenities: []
             };
             
-            // Filtrar valores vacíos
-            Object.keys(filters).forEach(key => {
-                if (filters[key] === '' || filters[key] === null) {
-                    filters[key] = [];
-                }
-            });
+            // Recopilar valores de filtros con manejo correcto de valores vacíos
+            const barrioValue = document.getElementById('barrio-select').value;
+            if (barrioValue && barrioValue.trim() !== '') {
+                filters.barrios = [barrioValue];
+            }
+            
+            const tipoValue = document.getElementById('tipo-select').value;
+            if (tipoValue && tipoValue.trim() !== '') {
+                filters.tipos = [tipoValue];
+            }
+            
+            const operacionValue = document.getElementById('operacion-select').value;
+            if (operacionValue && operacionValue.trim() !== '') {
+                filters.operaciones = [operacionValue];
+            }
+            
+            const precioMinValue = document.getElementById('precio-min').value;
+            if (precioMinValue && precioMinValue.trim() !== '' && !isNaN(parseInt(precioMinValue))) {
+                filters.precio_min = parseInt(precioMinValue);
+            }
+            
+            const precioMaxValue = document.getElementById('precio-max').value;
+            if (precioMaxValue && precioMaxValue.trim() !== '' && !isNaN(parseInt(precioMaxValue))) {
+                filters.precio_max = parseInt(precioMaxValue);
+            }
+            
+            const ambientesMinValue = document.getElementById('ambientes-min').value;
+            if (ambientesMinValue && ambientesMinValue.trim() !== '' && !isNaN(parseInt(ambientesMinValue))) {
+                filters.ambientes_min = parseInt(ambientesMinValue);
+            }
+            
+            console.log('Filtros aplicados:', filters);
             
             const results = searchProperties(filters);
+            console.log(`Resultados encontrados: ${results.length}`);
             
             // Mostrar en chat
-            showMessage(`🔍 Búsqueda avanzada realizada: ${filters.barrios.join(', ')} ${filters.tipos.join(', ')} ${filters.operaciones.join(', ')}`, true);
-            const response = generateBotResponse(results, 'búsqueda avanzada');
-            showMessage(response);
+            let searchDescription = '🔍 Búsqueda avanzada realizada';
+            if (filters.barrios.length > 0) searchDescription += ` - Barrios: ${filters.barrios.join(', ')}`;
+            if (filters.tipos.length > 0) searchDescription += ` - Tipos: ${filters.tipos.join(', ')}`;
+            if (filters.operaciones.length > 0) searchDescription += ` - Operación: ${filters.operaciones.join(', ')}`;
+            if (filters.precio_min) searchDescription += ` - Precio desde: $${filters.precio_min.toLocaleString()}`;
+            if (filters.precio_max) searchDescription += ` - Precio hasta: $${filters.precio_max.toLocaleString()}`;
+            if (filters.ambientes_min) searchDescription += ` - Mín. ${filters.ambientes_min} ambientes`;
             
-            // Mostrar resultados
-            displayResults(results, results.slice(0, 6));
+            showMessage(searchDescription, true);
+            
+            if (results.length > 0) {
+                const response = generateBotResponse(results, 'búsqueda avanzada');
+                showMessage(response);
+                displayResults(results, results.slice(0, 6));
+            } else {
+                showMessage('❌ No se encontraron propiedades con los filtros especificados. Intenta con otros criterios de búsqueda.', false);
+                displayResults([], []);
+            }
         }
 
         function resetFilters() {
@@ -1040,14 +1184,25 @@
             document.getElementById('precio-min').value = '';
             document.getElementById('precio-max').value = '';
             document.getElementById('ambientes-min').value = '';
+            
+            showMessage('🧹 Filtros limpiados. Puedes realizar una nueva búsqueda.', true);
+            
+            // Mostrar todas las propiedades después de resetear filtros
+            loadAllProperties();
         }
 
         function loadAllProperties() {
             const results = allProperties;
-            showMessage('📋 Cargando todas las propiedades disponibles', true);
-            const response = generateBotResponse(results, 'todas las propiedades');
-            showMessage(response);
-            displayResults(results, results.slice(0, 9));
+            showMessage(`📋 Mostrando todas las propiedades disponibles (${results.length} propiedades)`, true);
+            
+            if (results.length > 0) {
+                const response = generateBotResponse(results, 'todas las propiedades');
+                showMessage(response);
+                displayResults(results, results.slice(0, 9));
+            } else {
+                showMessage('❌ No hay propiedades disponibles para mostrar', false);
+                displayResults([], []);
+            }
         }
 
         // Funciones adicionales
