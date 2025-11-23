@@ -1021,7 +1021,7 @@
                             <a href="#" class="btn btn-primary" onclick="showPropertyDetails('${property.id_temporal}')">
                                 📸 Ver Fotos
                             </a>
-                            <a href="formulario.html" class="btn btn-secondary">
+                            <a href="#" class="btn btn-secondary" onclick="contactarPropiedad('${property.id_temporal}')">
                                 💬 Contactar
                             </a>
                             <a href="#" class="btn btn-secondary" onclick="saveToFavorites('${property.id_temporal}')">
@@ -1379,6 +1379,43 @@
             showMessage(`❤️ Propiedad ${propertyId} guardada en favoritos`, true);
         }
 
+        function contactarPropiedad(propertyId) {
+            // Buscar la propiedad en el sistema dinámico
+            const property = sistemaPropiedades.propiedades.find(p => p.id_temporal === propertyId);
+            
+            if (!property) {
+                showMessage(`❌ No se encontró la propiedad ${propertyId}`, false);
+                return;
+            }
+            
+            // Crear mensaje para WhatsApp
+            const mensaje = `Hola, me interesa la propiedad:
+🏠 ${property.titulo}
+📍 Ubicación: ${property.barrio}
+💰 Precio: $${property.precio ? property.precio.toLocaleString() : 'N/A'} ${property.moneda_precio || 'USD'}
+🛏️ Ambientes: ${property.ambientes || 'N/A'}
+📐 Superficie: ${property.metros_cuadrados || 'N/A'} m²
+
+¿Podrían proporcionarme más información?
+            
+ID Propiedad: ${property.id_temporal}`;
+
+            // Codificar el mensaje para URL
+            const mensajeCodificado = encodeURIComponent(mensaje);
+            
+            // Número de WhatsApp (reemplazar con el número real)
+            const numeroWhatsApp = "5491125368595"; // Número sin + y sin guiones
+            
+            // Crear URL de WhatsApp
+            const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
+            
+            // Abrir WhatsApp
+            window.open(urlWhatsApp, '_blank');
+            
+            // Mostrar mensaje de confirmación
+            showMessage(`💬 Abriendo WhatsApp para contactar sobre "${property.titulo}"`, true);
+        }
+
         function showAllResults() {
             const allResults = allProperties; // O los resultados de la última búsqueda
             displayResults(allResults, allResults.slice(0, 12));
@@ -1395,6 +1432,46 @@
         window.onload = function() {
             loadProperties();
             document.getElementById('messageInput').focus();
+        };
+
+        // Hacer funciones globales para testing en consola
+        window.showPropertyDetails = showPropertyDetails;
+        window.crearModalFotos = crearModalFotos;
+        window.contactarPropiedad = contactarPropiedad;
+        window.cerrarModal = cerrarModal;
+        window.cerrarFotoAmpliada = cerrarFotoAmpliada;
+        window.ampliarFoto = ampliarFoto;
+
+        // Funciones de filtros avanzados (implementación básica)
+        window.filtrarPorTipo = function(tipo) {
+            console.log(`🔍 Filtrando por tipo: ${tipo}`);
+            // Aquí implementarías la lógica de filtrado
+            const propiedadesFiltradas = sistemaPropiedades.propiedades.filter(p => 
+                p.tipo === tipo
+            );
+            displayResults(propiedadesFiltradas, propiedadesFiltradas.slice(0, 12));
+        };
+
+        window.filtrarPorPrecio = function(precioMin, precioMax) {
+            console.log(`💰 Filtrando precio: ${precioMin} - ${precioMax}`);
+            const propiedadesFiltradas = sistemaPropiedades.propiedades.filter(p => {
+                const precio = p.precio || 0;
+                return precio >= precioMin && precio <= precioMax;
+            });
+            displayResults(propiedadesFiltradas, propiedadesFiltradas.slice(0, 12));
+        };
+
+        window.filtrarPorBarrio = function(barrio) {
+            console.log(`📍 Filtrando por barrio: ${barrio}`);
+            const propiedadesFiltradas = sistemaPropiedades.propiedades.filter(p => 
+                p.barrio === barrio
+            );
+            displayResults(propiedadesFiltradas, propiedadesFiltradas.slice(0, 12));
+        };
+
+        window.limpiarFiltros = function() {
+            console.log('🧹 Limpiando filtros...');
+            displayResults(sistemaPropiedades.propiedades, sistemaPropiedades.propiedades.slice(0, 12));
         };
     </script>
     <script src="app.js"></script>
