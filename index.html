@@ -919,7 +919,7 @@
                 html += `
                     <div class="property-card">
                         <h3>${property.titulo}</h3>
-                        <img src="${getPropertyImage(property)}" alt="${property.titulo}" class="property-image" loading="lazy" />
+                        <img src="${obtenerImagenPropiedad(property)}" alt="${property.titulo}" class="property-image" loading="lazy" />
                         <div class="property-info">
                             <div class="info-item">
                                 <span>📍</span>
@@ -1148,3 +1148,6 @@
             document.getElementById('messageInput').focus();
         };
     </script>
+    <script src="app.js"></script>
+</body>
+</html>
