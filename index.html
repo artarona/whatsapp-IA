@@ -3,220 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dante Propiedades - Galería con Múltiples Imágenes</title>
-    <link rel="icon" href="/logo.png" type="image/png">
-    
+    <title>🤖 Búsqueda Inteligente de Propiedades - Dante Propiedades</title>
+    <link rel="icon" href="llave.png" type="image/png">
     <style>
-        /* RESET Y BASE */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
-            color: #333;
-            line-height: 1.6;
         }
-        
-        /* HEADER */
+
         .header {
             background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
             color: white;
-            padding: 40px 20px;
+            padding: 20px;
             text-align: center;
             box-shadow: 0 4px 20px rgba(35, 45, 235, 0.3);
         }
-        
+
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 10px;
-            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
             flex-wrap: wrap;
         }
-        
-        .header .company-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .header .phone {
-            font-size: 0.4em;
+
+        .chatbot-tab {
             background: rgba(255, 255, 255, 0.2);
             padding: 8px 16px;
             border-radius: 20px;
+            font-size: 0.4em;
             font-weight: 500;
+            margin-left: 10px;
         }
-        
-        .header .logo-key {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        
-        .header .logo-key img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.8em;
-            }
-            
-            .header .phone {
-                font-size: 0.35em;
-                padding: 6px 12px;
-            }
-            
-            .whatsapp-float {
-                width: 55px;
-                height: 55px;
-                bottom: 15px;
-                right: 15px;
-            }
-            
-            .whatsapp-float svg {
-                width: 24px;
-                height: 24px;
-            }
-        }
-        
+
         .header p {
-            font-size: 1.2em;
+            font-size: 1.1em;
             opacity: 0.9;
         }
-        
-        /* BOTONES DE ACCIÓN */
-        .btn-search, .btn-reset {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-        
-        .btn-search {
-            background: #232deb;
-            color: white;
-        }
-        
-        .btn-search:hover {
-            background: #1a1db4;
-            transform: translateY(-2px);
-        }
-        
-        .btn-reset:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-        
-        /* WHATSAPP FLOTANTE */
-        .whatsapp-float {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            width: 65px;
-            height: 65px;
-            background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: white;
-            font-size: 30px;
-            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-            z-index: 1000;
-            transition: all 0.3s ease;
-            animation: pulse-whatsapp 2.5s infinite;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .whatsapp-float:hover {
-            transform: scale(1.15);
-            box-shadow: 0 8px 30px rgba(37, 211, 102, 0.7);
-            background: linear-gradient(135deg, #128c7e 0%, #25d366 100%);
-        }
-        
-        .whatsapp-float svg {
-            width: 28px;
-            height: 28px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-        }
-        
-        @keyframes pulse-whatsapp {
-            0% { 
-                transform: scale(1);
-                box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-            }
-            50% { 
-                transform: scale(1.05);
-                box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
-            }
-            100% { 
-                transform: scale(1);
-                box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-            }
-        }
-        
-        /* CONTAINER PRINCIPAL */
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-        
-        /* FILTROS */
-        .filters {
+
+        .chatbot-interface {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
             margin-bottom: 30px;
         }
-        
-        .filters h3 {
-            color: #232deb;
-            margin-bottom: 20px;
-            font-size: 1.4em;
+
+        .chatbot-header {
+            background: #232deb;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
         }
-        
-        .filter-row {
+
+        .chatbot-header h2 {
+            margin-bottom: 5px;
+        }
+
+        .chatbot-header p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            animation: messageAppear 0.3s ease;
+        }
+
+        @keyframes messageAppear {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bot-message {
+            background: #f8f9fa;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+        }
+
+        .user-message {
+            background: #232deb;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 6px;
+        }
+
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input input:focus {
+            border-color: #232deb;
+        }
+
+        .send-button {
+            background: #232deb;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .send-button:hover {
+            background: #1a1db4;
+            transform: scale(1.05);
+        }
+
+        .quick-commands {
+            padding: 15px 20px 0;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .quick-commands h3 {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .command-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .command-btn {
+            background: white;
+            border: 1px solid #e1e5e9;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .command-btn:hover {
+            background: #232deb;
+            color: white;
+            border-color: #232deb;
+        }
+
+        .property-results {
+            margin-top: 20px;
+        }
+
+        .property-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
+        }
+
+        .property-image {
+            width: 100%;
+            margin-bottom: 15px;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .property-image img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .property-image img:hover {
+            transform: scale(1.02);
+        }
+
+        .property-card h3 {
+            color: #232deb;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .property-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .property-amenities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .amenity {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .property-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #232deb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a1db4;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-2px);
+        }
+
+        .search-filters {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filters-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
-        
+
         .filter-group {
             display: flex;
             flex-direction: column;
         }
-        
+
         .filter-group label {
             color: #495057;
             font-weight: 600;
             margin-bottom: 8px;
             font-size: 14px;
         }
-        
+
+        .filter-group input,
         .filter-group select {
             padding: 12px 16px;
             border: 2px solid #e1e5e9;
@@ -226,14 +335,14 @@
             color: #495057;
             transition: border-color 0.3s ease;
         }
-        
+
+        .filter-group input:focus,
         .filter-group select:focus {
             outline: none;
             border-color: #232deb;
         }
-        
-        /* CONTADOR DE RESULTADOS */
-        .results-counter {
+
+        .search-stats {
             text-align: center;
             margin: 20px 0;
             padding: 15px;
@@ -242,1756 +351,800 @@
             color: #232deb;
             font-weight: 600;
         }
-        
-        /* GRID DE PROPIEDADES */
-        .properties-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .property-card {
-            position: relative;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-            border: 1px solid #e1e5e9;
-        }
-        
-        .property-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        /* GALERÍA DE MÚLTIPLES IMÁGENES - COLLAGAGE */
-        .property-gallery {
-            position: relative;
-            height: 200px;
-            cursor: pointer;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .property-gallery-collage {
-            display: grid;
-            grid-template-rows: 1fr 2fr 1fr;
-            height: 100%;
-            gap: 1px;
-        }
-        
-        .collage-top-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1px;
-        }
-        
-        .collage-bottom-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1px;
-        }
-        
-        .collage-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        .collage-image:hover {
-            transform: scale(1.05);
-            filter: brightness(1.1);
-        }
-        
-        .collage-main {
-            grid-column: 1 / -1;
-            height: 100%;
-            position: relative;
-        }
-        
-        .collage-thumbnail {
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .collage-main .collage-image {
-            object-fit: cover;
-        }
-        
-        .gallery-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(35, 45, 235, 0.7);
+
+        .typing-dots {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            gap: 4px;
         }
-        
-        .property-gallery:hover .gallery-overlay {
-            opacity: 1;
-        }
-        
-        .gallery-overlay span {
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.9);
-            color: #232deb;
-            padding: 8px 16px;
-            border-radius: 20px;
-        }
-        
-        /* GALERÍA EXPANDIBLE */
-        .expandable-gallery-container:hover .gallery-initial-view .gallery-overlay {
-            opacity: 1;
-        }
-        
-        .expanded-image-item:hover .image-hover-overlay {
-            opacity: 1 !important;
-        }
-        
-        .expanded-images-grid .expanded-image-item {
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .expanded-controls button {
-            transition: background-color 0.3s ease;
-        }
-        
-        .expanded-controls button:hover {
-            background: rgba(35, 45, 235, 1) !important;
-        }
-        
-        .gallery-expand-indicator {
-            pointer-events: none;
-        }
-        
-        /* MODAL PARA IMAGEN INDIVIDUAL */
-        .image-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 9999;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .modal-content {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .modal-image {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-            border-radius: 8px;
-            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
-            animation: zoomIn 0.3s ease;
-        }
-        
-        .modal-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .modal-nav:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-50%) scale(1.1);
-        }
-        
-        .modal-prev {
-            left: 20px;
-        }
-        
-        .modal-next {
-            right: 20px;
-        }
-        
-        .modal-close {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-        }
-        
-        .modal-counter {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-        }
-        
-        .modal-info {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            color: white;
-            font-size: 18px;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        
-        .property-nav-dot {
+
+        .typing-dots span {
             width: 8px;
             height: 8px;
+            background: #999;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: typing 1.4s infinite;
         }
-        
-        .property-nav-dot.active {
-            background: #232deb;
-            transform: scale(1.2);
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
         }
-        
-        .property-nav-dot:hover {
-            background: rgba(255, 255, 255, 0.9);
-            transform: scale(1.1);
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
         }
-        
-        /* BADGES */
-        .badges {
-            position: absolute;
-            z-index: 1;
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
         }
-        
-        .badge-left {
-            top: 10px;
-            left: 10px;
-        }
-        
-        .badge-right {
-            top: 10px;
-            right: 10px;
-        }
-        
-        .property-badge {
-            background: #232deb;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .property-badge.alquiler {
-            background: #ff0101;
-        }
-        
-        .property-badge.venta {
-            background: #232deb;
-        }
-        
-        /* CONTENIDO DE LA TARJETA */
-        .property-content {
-            padding: 20px;
-        }
-        
-        .property-title {
-            margin: 0 0 10px 0;
-            color: #495057;
-            font-size: 18px;
-            font-weight: 600;
-            line-height: 1.3;
-        }
-        
-        .property-location {
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
             color: #6c757d;
-            font-size: 14px;
+        }
+
+        .no-results h3 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .suggestions {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .suggestions h4 {
+            color: #495057;
             margin-bottom: 10px;
         }
-        
-        .property-price {
-            font-size: 24px;
-            font-weight: 700;
-            color: #232deb;
-            margin-bottom: 5px;
-        }
-        
-        .property-expenses {
-            font-size: 12px;
-            color: #6c757d;
-            margin-bottom: 15px;
-        }
-        
-        .property-details {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            font-size: 14px;
-            color: #495057;
-        }
-        
-        .property-multimedia {
-            color: #232deb;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-        
-        .btn-details {
-            width: 100%;
-            background: #232deb;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-details:hover {
-            background: #1a1db4;
-        }
-        
-        /* MENSAJE DE CARGA */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-            font-size: 18px;
+
+        .suggestions ul {
+            list-style: none;
+            padding-left: 0;
         }
 
-        /* SPINNER CON LOGO ROTANDO */
-        .logo-spinner {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            color: #6c757d;
-            font-size: 18px;
+        .suggestions li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
         }
 
-        .spinning-logo {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            animation: spin 2s linear infinite;
-            filter: drop-shadow(0 2px 8px rgba(35, 45, 235, 0.3));
+        .suggestions li::before {
+            content: "💡";
+            position: absolute;
+            left: 0;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* SPINNER PARA EL CONTADOR DE RESULTADOS */
-        .results-counter .logo-spinner {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 0;
-            margin-right: 10px;
-            animation: spin 1.5s linear infinite;
-        }
-
-        .loading-with-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* RESPONSIVE */
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
             }
             
             .header h1 {
-                font-size: 2em;
+                font-size: 1.8em;
             }
             
-            .properties-grid {
+            .filters-grid {
                 grid-template-columns: 1fr;
             }
             
-            .filter-row {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* ESTILOS ADICIONALES PARA EMOJIS */
-        .emoji {
-            display: inline-block;
-            font-size: 1em;
-        }
-        
-        /* ========================================
-           MODAL DE IMÁGENES - GALERÍA COMPLETA
-           ======================================== */
-        
-        .modal-imagenes {
-            display: none;
-            position: fixed;
-            z-index: 10000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.9);
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal-contenido {
-            position: relative;
-            background-color: #fefefe;
-            margin: 0.5% auto;
-            padding: 0;
-            width: 95%;
-            max-width: 1000px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-            animation: modalFadeIn 0.3s ease-out;
-        }
-        
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .modal-header {
-            background: #232deb;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(35, 45, 235, 0.3);
-        }
-        
-        .modal-logo-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .modal-logo {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        
-        .modal-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 50%;
-        }
-        
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.2em;
-            font-weight: 600;
-        }
-        
-        .btn-cerrar {
-            color: white;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: 0;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background-color 0.3s ease;
-        }
-        
-        .btn-cerrar:hover,
-        .btn-cerrar:focus {
-            background-color: rgba(255,255,255,0.2);
-            transform: scale(1.1);
-        }
-        
-        .imagen-principal {
-            position: relative;
-            width: 100%;
-            height: 500px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-color: #f8f9fa;
-        }
-        
-        .modal-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
-            color: white;
-            border: none;
-            padding: 15px 20px;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            z-index: 1001;
-            box-shadow: 0 4px 16px rgba(35, 45, 235, 0.4);
-        }
-        
-        .modal-nav:hover {
-            background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
-            transform: translateY(-50%) scale(1.1);
-            box-shadow: 0 6px 20px rgba(35, 45, 235, 0.6);
-        }
-        
-        .nav-anterior {
-            left: 20px;
-        }
-        
-        .nav-siguiente {
-            right: 20px;
-        }
-        
-        .modal-info {
-            padding: 15px 20px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #495057;
-            font-weight: 500;
-        }
-        
-        .imagen-contador {
-            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(35, 45, 235, 0.3);
-        }
-        
-        .imagen-titulo {
-            color: #6c757d;
-            font-style: italic;
-        }
-        
-        /* Responsive para modal */
-        @media (max-width: 768px) {
-            .modal-contenido {
-                width: 98%;
-                margin: 2% auto;
-                max-height: 95vh;
-                display: flex;
-                flex-direction: column;
-            }
-            
-            .imagen-principal {
+            .chat-messages {
                 height: 300px;
-                flex: 1;
-            }
-            
-            .modal-nav {
-                padding: 10px 15px;
-                font-size: 16px;
-            }
-            
-            .nav-anterior {
-                left: 10px;
-            }
-            
-            .nav-siguiente {
-                right: 10px;
             }
         }
-
-        /* Responsive para galería de imágenes en celulares */
-        @media (max-width: 480px) {
-            .modal-imagenes {
-                padding: 0;
-            }
-            
-            .modal-contenido {
-                width: 100%;
-                height: 100vh;
-                margin: 0;
-                border-radius: 0;
-                max-width: none;
-                max-height: none;
-                display: flex;
-                flex-direction: column;
-                animation: none;
-            }
-            
-            .modal-header {
-                padding: 15px;
-                flex-shrink: 0;
-            }
-            
-            .imagen-principal {
-                height: calc(100vh - 140px);
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-position: center;
-            }
-            
-            .modal-logo-title {
-                gap: 10px;
-            }
-            
-            .modal-logo {
-                width: 28px;
-                height: 28px;
-                padding: 3px;
-            }
-            
-            .modal-header h3 {
-                font-size: 1.1em;
-            }
-            
-            .modal-nav {
-                padding: 12px 18px;
-                font-size: 18px;
-                z-index: 1002;
-            }
-            
-            .nav-anterior {
-                left: 15px;
-            }
-            
-            .nav-siguiente {
-                right: 15px;
-            }
-            
-            .modal-nav {
-                padding: 14px 20px;
-                box-shadow: 0 6px 20px rgba(35, 45, 235, 0.5);
-            }
-            
-            .modal-nav:hover {
-                transform: translateY(-50%) scale(1.15);
-            }
-            
-            .modal-info {
-                padding: 12px 15px;
-                flex-shrink: 0;
-                position: relative;
-                z-index: 1001;
-            }
-            
-            .btn-cerrar {
-                width: 40px;
-                height: 40px;
-                font-size: 24px;
-                background-color: rgba(255,255,255,0.1);
-            }
-            
-            .btn-cerrar:hover,
-            .btn-cerrar:focus {
-                background-color: rgba(255,255,255,0.25);
-            }
-        }
-        
-        /* ========================================
-           ESTILOS PARA SLIDER CLICKEABLE
-           ======================================== */
-        
-        /* Asegurar que los controles del slider no interfieran con el clic del modal */
-        .property-slider-btn {
-            z-index: 3 !important;
-        }
-        
-        .property-nav-dots {
-            z-index: 3 !important;
-        }
-        
-        .property-nav-dot {
-            z-index: 3 !important;
-        }
-        
-        /* ANIMACIONES */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes zoomIn {
-            from { 
-                opacity: 0; 
-                transform: scale(0.8);
-            }
-            to { 
-                opacity: 1; 
-                transform: scale(1);
-            }
-        }
-        
-        /* RESPONSIVE - COLLAGAGE MÓVIL */
-        @media (max-width: 768px) {
-            .property-gallery {
-                height: 150px;
-            }
-            
-            .collage-top-row,
-            .collage-bottom-row {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .modal-nav {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-            
-            .modal-prev {
-                left: 10px;
-            }
-            
-            .modal-next {
-                right: 10px;
-            }
-            
-            .modal-close {
-                top: 20px;
-                right: 20px;
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-            }
-        }
-    
-        /* ========================================
-        ESTILOS PARA GALERÍA MASONRY
-        ======================================== */
-
-        .masonry-item {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-
-        .masonry-item:hover {
-            z-index: 10 !important;
-        }
-
-        .masonry-small {
-            /* Tamaño pequeño - ya definido en JS */
-        }
-
-        .masonry-medium {
-            /* Tamaño mediano - ya definido en JS */
-        }
-
-        .masonry-large {
-            /* Tamaño grande - ya definido en JS */
-        }
-
-        /* Efectos de hover mejorados */
-        .masonry-item:hover img {
-            transform: scale(1.05);
-            transition: transform 0.4s ease !important;
-        }
-
-        /* Responsive para masonry */
-        @media (max-width: 768px) {
-            #masonry-gallery-container {
-                padding: 10px !important;
-            }
-            
-            .masonry-item {
-                border-radius: 8px !important;
-            }
-        }
-
-        /* Scrollbar personalizado para el contenedor masonry */
-        #masonry-gallery-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #masonry-gallery-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        #masonry-gallery-container::-webkit-scrollbar-thumb {
-            background: #232deb;
-            border-radius: 4px;
-        }
-
-        #masonry-gallery-container::-webkit-scrollbar-thumb:hover {
-            background: #1a1db4;
-        }
-
-        /* Animación de entrada para items masonry */
-        @keyframes masonryItemFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .masonry-item {
-            animation: masonryItemFadeIn 0.5s ease-out;
-        }
-
-        /* Efecto de carga progresiva */
-        .masonry-item:nth-child(1) { animation-delay: 0.1s; }
-        .masonry-item:nth-child(2) { animation-delay: 0.2s; }
-        .masonry-item:nth-child(3) { animation-delay: 0.3s; }
-        .masonry-item:nth-child(4) { animation-delay: 0.4s; }
-        .masonry-item:nth-child(5) { animation-delay: 0.5s; }
-        .masonry-item:nth-child(6) { animation-delay: 0.6s; }
-        /* ... continuar según necesidad */
-            
-            
-        /* ========================================
-    ESTILOS PARA MODALES DE MULTIMEDIA (PDFs y VIDEOS)
-    ======================================== */
-
-    #pdf-modal,
-    #video-modal {
-        animation: fadeIn 0.3s ease !important;
-    }
-
-    #pdf-modal iframe,
-    #video-modal video {
-        border-radius: 0 0 8px 8px !important;
-    }
-
-    /* Botones de multimedia en las tarjetas */
-    .multimedia-btn {
-        transition: all 0.3s ease !important;
-    }
-
-    .multimedia-btn:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
-    }
-
-    /* Responsive para modales de video */
-    @media (max-width: 768px) {
-        #video-modal > div {
-            width: 95% !important;
-            height: 60% !important;
-        }
-        
-        #pdf-modal > div {
-            width: 95% !important;
-            height: 80% !important;
-        }
-    }
-
-    @media (max-width: 480px) {
-        #video-modal > div {
-            width: 98% !important;
-            height: 50% !important;
-        }
-        
-        #pdf-modal > div {
-            width: 98% !important;
-            height: 70% !important;
-        }
-        
-        .multimedia-section {
-            font-size: 12px !important;
-        }
-        
-        .multimedia-section button {
-            padding: 4px 8px !important;
-            font-size: 11px !important;
-        }
-    }
-
-    /* Efectos de hover para botones de multimedia */
-    .multimedia-section button:hover {
-        background: #e9ecef !important;
-        border-color: #232deb !important;
-        color: #232deb !important;
-    }
-
-    /* ========================================
-    ESTILOS PARA GALERÍA MASONRY
-    ======================================== */
-
-    .masonry-item {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-
-    .masonry-item:hover {
-        z-index: 10 !important;
-    }
-
-    .masonry-small {
-        /* Tamaño pequeño - ya definido en JS */
-    }
-
-    .masonry-medium {
-        /* Tamaño mediano - ya definido en JS */
-    }
-
-    .masonry-large {
-        /* Tamaño grande - ya definido en JS */
-    }
-
-    /* Efectos de hover mejorados */
-    .masonry-item:hover img {
-        transform: scale(1.05);
-        transition: transform 0.4s ease !important;
-    }
-
-    /* Responsive para masonry */
-    @media (max-width: 768px) {
-        #masonry-gallery-container {
-            padding: 10px !important;
-        }
-        
-        .masonry-item {
-            border-radius: 8px !important;
-        }
-    }
-
-    /* Scrollbar personalizado para el contenedor masonry */
-    #masonry-gallery-container::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    #masonry-gallery-container::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-    }
-
-    #masonry-gallery-container::-webkit-scrollbar-thumb {
-        background: #232deb;
-        border-radius: 4px;
-    }
-
-    #masonry-gallery-container::-webkit-scrollbar-thumb:hover {
-        background: #1a1db4;
-    }
-
-    /* Animación de entrada para items masonry */
-    @keyframes masonryItemFadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-
-    .masonry-item {
-        animation: masonryItemFadeIn 0.5s ease-out;
-    }
-
-    /* Efecto de carga progresiva */
-    .masonry-item:nth-child(1) { animation-delay: 0.1s; }
-    .masonry-item:nth-child(2) { animation-delay: 0.2s; }
-    .masonry-item:nth-child(3) { animation-delay: 0.3s; }
-    .masonry-item:nth-child(4) { animation-delay: 0.4s; }
-    .masonry-item:nth-child(5) { animation-delay: 0.5s; }
-    .masonry-item:nth-child(6) { animation-delay: 0.6s; }
-                
-    
-    
-    
-    
     </style>
 </head>
 <body>
     <div class="header">
         <h1>
-            <span class="logo-key">
-                <img src="llave.png" alt="Logo Dante Propiedades">
-            </span>
-            <div class="company-info">
-                <span>Dante Propiedades</span>
-                <span class="phone">📞 +54 11 2536-8595</span>
-            </div>
+            🏠 Dante Propiedades
+            <span class="chatbot-tab">🤖 Chatbot Inteligente</span>
         </h1>
-        <p>Sistema sin errores de consola + Slider de múltiples fotos</p>
+        <p>Búsqueda automática y consulta inteligente de propiedades</p>
     </div>
-    
-
-    <!-- === SECCIÓN PROPIEDAD INTERACTIVA === -->
-    <!-- <div class="property-interactive-container">
-        <div class="property-card" id="propertyCard">
-            <div class="property-header">
-                <h1 class="property-title">Monoambiente Microcentro</h1>
-                <div class="property-address">
-                    <span>📍</span> Avda. Corrientes 848 - Microcentro
-                </div>
-                <div class="property-price">ARS 400.000</div>
-                <div class="expenses">+ ARS 95.000 expensas</div>
-            </div>
-            
-            <div class="property-details">
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <div class="detail-value">1</div>
-                        <div class="detail-label">Ambiente</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-value">23 m²</div>
-                        <div class="detail-label">Superficie</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-value">4°</div>
-                        <div class="detail-label">Piso</div>
-                    </div>
-                </div>
-                
-                <div class="property-condition">
-                    <span>✓</span> Estado: Bueno
-                </div>
-            </div>
-            
-            <div class="media-section">
-                <div class="section-title">
-                    <span>📸</span> Multimedia Disponible
-                </div>
-                <div class="media-icons">
-                    <div class="media-icon" id="photosIcon">
-                        <div class="icon icon-camera">📷</div>
-                        <div class="icon-label">Fotos Profesionales</div>
-                    </div>
-                    <div class="media-icon" id="tourIcon">
-                        <div class="icon icon-tour">🔄</div>
-                        <div class="icon-label">Tour 360°</div>
-                    </div>
-                    <div class="media-icon" id="videoIcon">
-                        <div class="icon icon-video">🎥</div>
-                        <div class="icon-label">Video</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="pdf-section">
-                <div class="section-title">
-                    <span>📄</span> Documentos PDF
-                </div>
-                <div class="pdf-item" id="planoPdf">
-                    <div class="pdf-icon">📐</div>
-                    <div class="pdf-info">
-                        <div class="pdf-title">Plano del Departamento</div>
-                        <div class="pdf-size">Tamaño: 1.2 MB</div>
-                    </div>
-                </div>
-                <div class="pdf-item" id="reglamentoPdf">
-                    <div class="pdf-icon">📋</div>
-                    <div class="pdf-info">
-                        <div class="pdf-title">Reglamento de Copropiedad</div>
-                        <div class="pdf-size">Tamaño: 850 KB</div>
-                    </div>
-                </div>
-                <div class="pdf-item" id="expensasPdf">
-                    <div class="pdf-icon">💰</div>
-                    <div class="pdf-info">
-                        <div class="pdf-title">Detalle de Expensas</div>
-                        <div class="pdf-size">Tamaño: 720 KB</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="property-details">
-                <button class="action-button" id="contactButton">Contactar para más información</button>
-            </div>
-        </div> -->
-        
-        <!-- <div class="json-display">
-            <div class="json-title">
-                <span>⚙️</span> Archivo propiedades.json (simulado)
-            </div>
-            <pre class="json-pre" id="jsonData"></pre>
-        </div> -->
-    </div>
-
-    <!-- Modal para PDFs -->
-    <!-- <div class="property-modal" id="pdfModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Documento PDF</h2>
-                <button class="close-modal" id="closeModal">&times;</button>
-            </div>
-            <iframe class="pdf-viewer" id="pdfViewer" frameborder="0"></iframe>
-        </div>
-    </div> --> 
-
-    <!-- <div class="pdf-section">
-        <div class="section-title">
-            <span>📄</span> Documentos PDF
-        </div>
-        
-        <div class="pdf-item" id="entornosPdf">
-            <div class="pdf-icon">🏞️</div>
-            <div class="pdf-info">
-                <div class="pdf-title">Estudio de Entornos</div>
-                <div class="pdf-size">Tamaño: 1.5 MB</div>
-            </div>
-        </div>
-        
-        <div class="pdf-item" id="datosParcelaPdf">
-            <div class="pdf-icon">📊</div>
-            <div class="pdf-info">
-                <div class="pdf-title">Datos de la Parcela</div>
-                <div class="pdf-size">Tamaño: 2.1 MB</div>
-            </div>
-        </div>
-        
-        
-        <div class="pdf-item" id="planoPdf">
-            <div class="pdf-icon">📐</div>
-            <div class="pdf-info">
-                <div class="pdf-title">Plano del Departamento</div>
-                <div class="pdf-size">Tamaño: 1.2 MB</div>
-            </div>
-        </div>
-    </div> -->
     
     <div class="container">
-        <!-- Filtros de búsqueda -->
-        <div class="filters">
-            <h3>🔍 Buscar Propiedades</h3>
-            <div class="filter-row">
+        <!-- Interfaz del Chatbot -->
+        <div class="chatbot-interface">
+            <div class="chatbot-header">
+                <h2>🤖 Asistente Virtual</h2>
+                <p>Pregúntame sobre cualquier propiedad usando lenguaje natural</p>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    🏠 ¡Hola! Soy tu asistente virtual de Dante Propiedades.
+
+🔍 **Te ayudo a encontrar la propiedad ideal:**
+• 🏙️ Por ubicación: "departamentos en Palermo"
+• 💰 Por precio: "hasta 150k USD" 
+• 🏢 Por tipo: "monoambientes en microcentro"
+• 🛏️ Por ambientes: "3 ambientes"
+• ✨ Por amenidades: "pileta y cochera"
+• 🌆 Por barrio: "casa en Parque Avellaneda"
+
+💬 **Ejemplos:**
+"Busco departamento de 2 ambientes hasta 200k USD en Palermo"
+"Monoambientes con pileta y cochera"  
+"Casa en Parque Avellaneda con jardín"
+
+¿En qué te ayudo hoy? 😊
+                </div>
+            </div>
+            
+            <div class="quick-commands">
+                <h3>⚡ Consultas Rápidas:</h3>
+                <div class="command-buttons">
+                    <button class="command-btn" onclick="sendCommand('departamentos en Palermo')">Departamentos Palermo</button>
+                    <button class="command-btn" onclick="sendCommand('monoambientes microcentro hasta 100k')">Monoambientes centro</button>
+                    <button class="command-btn" onclick="sendCommand('casas con pileta')">Casas con pileta</button>
+                    <button class="command-btn" onclick="sendCommand('departamentos alquiler')">Departamentos alquiler</button>
+                    <button class="command-btn" onclick="sendCommand('propiedades hasta 150k USD')">Hasta 150k USD</button>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Ej: 'busco departamento en Palermo de 2 ambientes'" maxlength="300">
+                <button class="send-button" onclick="sendMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Búsqueda Avanzada -->
+        <div class="search-filters">
+            <h3 style="margin-bottom: 20px; color: #232deb;">🔍 Búsqueda Avanzada</h3>
+            <div class="filters-grid">
                 <div class="filter-group">
-                    <label for="operacion-select-styled">Operación</label>
-                    <select id="operacion-select-styled">
+                    <label for="barrio-select">Barrio</label>
+                    <select id="barrio-select">
+                        <option value="">Todos los barrios</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="tipo-select">Tipo</label>
+                    <select id="tipo-select">
+                        <option value="">Todos los tipos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="operacion-select">Operación</label>
+                    <select id="operacion-select">
                         <option value="">Todas las operaciones</option>
                         <option value="venta">Venta</option>
                         <option value="alquiler">Alquiler</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="barrio-select-styled">Barrio</label>
-                    <select id="barrio-select-styled">
-                        <option value="">Todos los barrios</option>
-                    </select>
+                    <label for="precio-min">Precio mínimo (USD)</label>
+                    <input type="number" id="precio-min" placeholder="Ej: 100000">
                 </div>
                 <div class="filter-group">
-                    <label for="tipo-select-styled">Tipo</label>
-                    <select id="tipo-select-styled">
-                        <option value="">Todos los tipos</option>
-                    </select>
+                    <label for="precio-max">Precio máximo (USD)</label>
+                    <input type="number" id="precio-max" placeholder="Ej: 300000">
                 </div>
-                <div class="filter-group" style="display: flex; gap: 10px; align-items: end;">
-                    <button id="search-btn-styled" class="btn-search" onclick="searchProperties()">
-                        🔍 Buscar
-                    </button>
-                    <button id="reset-btn-styled" class="btn-reset" onclick="resetFilters()" style="background: #6c757d;">
-                        🏠 Inicio
-                    </button>
+                <div class="filter-group">
+                    <label for="ambientes-min">Mín. ambientes</label>
+                    <input type="number" id="ambientes-min" placeholder="Ej: 2">
                 </div>
+            </div>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="advancedSearch()">🔍 Buscar Propiedades</button>
+                <button class="btn btn-secondary" onclick="resetFilters()">🏠 Limpiar Filtros</button>
+                <button class="btn btn-secondary" onclick="loadAllProperties()">📋 Ver Todas</button>
             </div>
         </div>
         
-        <!-- Contador de resultados -->
-        <div class="results-counter" id="results-counter-styled">
-            <div class="loading-with-logo">
-                <img src="llave.png" alt="Logo" class="spinning-logo">
-                <span>Cargando propiedades...</span>
-            </div>
+        <div class="search-stats" id="searchStats" style="display: none;">
+            📊 <span id="resultsCount">0</span> propiedades encontradas
         </div>
-        
-        <!-- Grid de propiedades -->
-        <div class="properties-grid" id="properties-container">
-            <div class="logo-spinner">
-                <img src="llave.png" alt="Logo" class="spinning-logo">
-                <div>Cargando propiedades con galería de imágenes...</div>
-            </div>
-        </div>
-        
-        <!-- Footer -->
-        <footer class="site-footer" style="background: #2c3e50; color: white; padding: 30px 20px; margin-top: 40px; text-align: center;">
-            <div style="max-width: 1200px; margin: 0 auto;">
-                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; align-items: center; margin-bottom: 20px;">
-                    <div>
-                        <img src="llave.png" alt="Dante Propiedades" style="width: 40px; height: 40px; margin-right: 10px; vertical-align: middle;">
-                        <strong style="font-size: 18px;">Dante Propiedades</strong>
-                    </div>
-                    <div style="color: #bdc3c7;">
-                        <strong>Contacto:</strong> +54 11 6656 2078 | <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3f565159507f5b5e514b5a4f4d504f565a5b5e5b5a4c115c5052115e4d">[email&#160;protected]</a>
-                    </div>
-                </div>
-                
-                <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
-                    <a href="formulario.html" style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📋 Formulario de Contacto</a>
-                    <!-- <a href="#" onclick="mostrarTerminos(); return false;" style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📜 Términos y Condiciones</a> -->
-                </div>
-                
-                <div style="border-top: 1px solid #34495e; padding-top: 15px; color: #95a5a6; font-size: 14px;">
-                    © 2025 Dante Propiedades - Todos los derechos reservados | Capital Federal, Argentina
-                </div>
-            </div>
-        </footer>
-        
-        <!-- Bloque de Información Legal -->
-        <div style="background: #dc3545; color: white; padding: 25px 20px; text-align: center; font-size: 13px; line-height: 1.5;">
-            <div style="max-width: 1200px; margin: 0 auto;">
-                <p style="margin: 0 0 15px 0; font-weight: 600;">
-                    Todas las medidas enunciadas son meramente orientativas, las medidas exactas serán las que se expresen en el respectivo título de propiedad de cada inmueble. Todas las fotos, imágenes y videos son meramente ilustrativos y no contractuales. Los precios enunciados son meramente orientativos y no contractuales.
-                </p>
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);">
-                    <p style="margin: 0 0 10px 0; font-weight: 600;">
-                        CIAColegio Profesional Inmobiliario Leyes Nº 3588, 2340 art. 11 y 57, Ley Nº 3588 art. 1 y 2<br>
-                        Artículo 5°.- Incorpórese como inciso 9 del artículo 10 de la Ley 2340 (texto consolidado según Ley 5666)
-                    </p>
-                    <p style="margin: 0; font-weight: 600;">
-                        <strong>LEY 5859 – ART. 5</strong><br>
-                        "Se encuentra prohibido cobrar comisiones inmobiliarias y gastos de gestoría de informes a los inquilinos que sean personas físicas. Para los casos de alquiler de vivienda, el monto máximo de comisión que se le puede requerir a los propietarios será el equivalente al cuatro con quince centésimos por ciento (4,15%) del valor total del respectivo contrato"
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- WhatsApp Flotante -->
-    <a href="https://wa.me/5491125368595?text=Hola,%20me%20interesa%20obtener%20información%20sobre%20propiedades" 
-       class="whatsapp-float" 
-       target="_blank" 
-       title="Contactar por WhatsApp">
-        <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.071z"/>
-        </svg>
-    </a>
-    
-    <!-- JavaScript del sistema -->
-    <!-- <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="app.js"></script> -->
-    
-    <script>
-        // console.log('🏠 Sistema Dante Propiedades - Versión Sin Errores + Slider cargando...');
-        // console.log('✅ Sin dependencias de Font Awesome');
-        // console.log('🎠 Slider de múltiples fotos incluido');
-        // console.log('🔧 Sistema de emojis para iconos');
-        // console.log('📄 Sistema de PDFs integrado');
-        // console.log('🎥 Sistema de videos integrado');
-        // console.log('🏗️ Galería Masonry activada');
-    
 
+        <!-- Resultados -->
+        <div class="property-results" id="propertyResults">
+            <div class="no-results">
+                <h3>🔍 Escribe tu consulta para ver propiedades</h3>
+                <p>Usa el chatbot de arriba o los filtros de búsqueda avanzada</p>
+            </div>
+        </div>
+    </div>
 
-        // Función para buscar propiedades
-        function searchProperties() {
-            const operacion = document.getElementById('operacion-select-styled').value;
-            const barrio = document.getElementById('barrio-select-styled').value;
-            const tipo = document.getElementById('tipo-select-styled').value;
-            
-            console.log('🔍 Buscando propiedades con filtros:', { operacion, barrio, tipo });
-            
-            // Llamar a la función de búsqueda del app.js si existe
-            if (typeof window.loadProperties === 'function') {
-                window.loadProperties();
-            }
-        }
-        
-        // Función para resetear filtros
-        function resetFilters() {
-            document.getElementById('operacion-select-styled').value = '';
-            document.getElementById('barrio-select-styled').value = '';
-            document.getElementById('tipo-select-styled').value = '';
-            
-            console.log('🏠 Filtros reseteados - Mostrando todas las propiedades');
-            
-            // Llamar a la función de mostrar todas las propiedades
-            if (typeof window.loadProperties === 'function') {
-                window.loadProperties();
-            }
-        }
-        
-        // Verificación de carga de recursos
-        window.addEventListener('load', function() {
-            console.log('✅ Todos los recursos cargados correctamente');
-            console.log('🎯 Sistema completamente funcional');
-        });
-    </script>
-    
-    <!-- Modal de Términos y Condiciones - DESHABILITADO -->
-    <!--
-    <div id="modal-terminos" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📜 Términos y Condiciones</h2>
-                <span class="close" onclick="cerrarModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="last-updated">
-                    <strong>Última actualización:</strong> 10 de Noviembre de 2025
-                </div>
-                
-                <h3>1. Información General</h3>
-                <p>Dante Propiedades es una empresa inmobiliaria con sede en Capital Federal, Argentina, dedicada a la intermediación en operaciones de compra, venta y alquiler de propiedades inmuebles.</p>
-                
-                <h3>2. Aceptación de Términos</h3>
-                <p>Al utilizar nuestros servicios y sitio web, usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de estos términos, no utilice nuestros servicios.</p>
-                
-                <h3>3. Servicios Ofrecidos</h3>
-                <ul>
-                    <li>Intermediación en compra y venta de propiedades</li>
-                    <li>Gestión de alquileres residenciales y comerciales</li>
-                    <li>Asesoramiento inmobiliario personalizado</li>
-                    <li>Evaluación y tasación de propiedades</li>
-                </ul>
-                
-                <h3>4. Uso del Sitio Web</h3>
-                <p>Este sitio web está destinado exclusivamente para fines informativos y de contacto. La información publicada es de carácter general y puede estar sujeta a cambios sin previo aviso.</p>
-                
-                <h3>5. Protección de Datos</h3>
-                <p>La información personal que nos proporcione será utilizada únicamente para contactarlo y brindarle nuestros servicios. No compartimos su información con terceros sin su consentimiento explícito.</p>
-                
-                <h3>6. Limitación de Responsabilidad</h3>
-                <p>Dante Propiedades no se hace responsable por daños directos, indirectos, incidentales o consecuentes derivados del uso de este sitio web o de la información contenida en él.</p>
-                
-                <h3>7. Contacto</h3>
-                <p>Para consultas sobre estos términos, puede contactarnos a través de nuestro formulario de contacto o WhatsApp: +54 9 11 2536-8595</p>
-                
-                <div style="text-align: center; margin-top: 30px;">
-                    <button onclick="cerrarModal()" class="btn btn-primary">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    -->
-    
-    <!-- Modal de Galería de Imágenes -->
-    <div id="modal-imagenes" class="modal-imagenes">
-        <div class="modal-contenido">
-            <div class="modal-header">
-                <div class="modal-logo-title">
-                    <div class="modal-logo">
-                        <img src="llave.png" alt="Dante Propiedades">
-                    </div>
-                    <h3 id="imagen-titulo">Galería de Imágenes</h3>
-                </div>
-                <button class="btn-cerrar" onclick="cerrarModalImagenes()">&times;</button>
-            </div>
-            <div id="imagen-principal" class="imagen-principal"></div>
-            <button class="modal-nav nav-anterior" onclick="imagenAnterior()">&#10094;</button>
-            <button class="modal-nav nav-siguiente" onclick="imagenSiguiente()">&#10095;</button>
-            <div class="modal-info">
-                <span id="imagen-contador" class="imagen-contador">1 / 1</span>
-                <span id="imagen-titulo-display" class="imagen-titulo"></span>
-            </div>
-        </div>
-    </div>
-    
-    <style>
-    .modal {
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.4);
-        backdrop-filter: blur(5px);
-    }
-    
-    .modal-content {
-        background-color: white;
-        margin: 5% auto;
-        padding: 0;
-        border-radius: 15px;
-        width: 90%;
-        max-width: 800px;
-        max-height: 80vh;
-        overflow: hidden;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        animation: modalAppear 0.3s ease;
-    }
-    
-    @keyframes modalAppear {
-        from { opacity: 0; transform: scale(0.7); }
-        to { opacity: 1; transform: scale(1); }
-    }
-    
-    .modal-header {
-        background: #232deb;
-        color: white;
-        padding: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 10px rgba(35, 45, 235, 0.3);
-    }
-    
-    .modal-header h2 {
-        margin: 0;
-        font-size: 1.8em;
-    }
-    
-    .close {
-        color: white;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-        line-height: 1;
-    }
-    
-    .close:hover {
-        opacity: 0.8;
-    }
-    
-    .modal-body {
-        padding: 30px;
-        max-height: 60vh;
-        overflow-y: auto;
-        line-height: 1.6;
-    }
-    
-    .last-updated {
-        background: #f8f9fa;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        text-align: center;
-        border-left: 4px solid #667eea;
-    }
-    
-    .modal-body h3 {
-        color: #333;
-        margin-top: 25px;
-        margin-bottom: 10px;
-        border-bottom: 2px solid #e9ecef;
-        padding-bottom: 5px;
-    }
-    
-    .modal-body p {
-        margin-bottom: 15px;
-        color: #555;
-    }
-    
-    .modal-body ul {
-        margin-bottom: 15px;
-        padding-left: 20px;
-    }
-    
-    .modal-body li {
-        margin-bottom: 5px;
-        color: #555;
-    }
-    
-    .btn {
-        padding: 12px 24px;
-        border: none;
-        border-radius: 8px;
-        font-size: 1em;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-weight: bold;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-    </style>
-    
     <script>
-    function mostrarTerminos() {
-        document.getElementById('modal-terminos').style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    }
-    
-    function cerrarModal() {
-        document.getElementById('modal-terminos').style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-    
-    // Cerrar modal al hacer clic fuera de él
-    window.onclick = function(event) {
-        const modal = document.getElementById('modal-terminos');
-        if (event.target == modal) {
-            cerrarModal();
-        }
-    }
-    
-    // Cerrar modal con tecla Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            cerrarModal();
-        }
-    });
-    </script>
-    
-    <script>
-    // Función para WhatsApp flotante
-    function setupWhatsAppFloat() {
-        const whatsappBtn = document.querySelector('.whatsapp-float');
-        if (whatsappBtn) {
-            // Agregar animación especial en primer clic
-            whatsappBtn.addEventListener('click', function() {
-                // Efecto visual de confirmación
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
+        // Datos de propiedades (cargar desde propiedades.json)
+        let allProperties = [];
+        let chatHistory = [];
+        let isTyping = false;
+
+        // Cargar propiedades al inicializar
+        async function loadProperties() {
+            try {
+                const response = await fetch('propiedades.json');
+                allProperties = await response.json();
+                console.log(`✅ Cargadas ${allProperties.length} propiedades`);
                 
-                // Log para seguimiento
-                console.log('💬 WhatsApp: Redirigiendo a chat...');
+                // Llenar filtros de barrios
+                const barrios = [...new Set(allProperties.map(p => p.barrio))].sort();
+                const barrioSelect = document.getElementById('barrio-select');
+                barrios.forEach(barrio => {
+                    const option = document.createElement('option');
+                    option.value = barrio;
+                    option.textContent = barrio;
+                    barrioSelect.appendChild(option);
+                });
                 
-                // Mensaje de confirmación
-                setTimeout(() => {
-                    const message = '💬 Abriendo WhatsApp para chatear sobre propiedades...';
-                    console.log(message);
-                    
-                    // Mostrar notificación visual (si el navegador lo permite)
-                    if ('Notification' in window && Notification.permission === 'granted') {
-                        new Notification('WhatsApp', {
-                            body: 'Redirigiendo al chat...',
-                            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2325d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.071z"/></svg>'
-                        });
+                // Llenar filtros de tipos
+                const tipos = [...new Set(allProperties.map(p => p.tipo))].sort();
+                const tipoSelect = document.getElementById('tipo-select');
+                tipos.forEach(tipo => {
+                    const option = document.createElement('option');
+                    option.value = tipo;
+                    option.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+                    tipoSelect.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Error cargando propiedades:', error);
+                showMessage('❌ Error cargando propiedades. Usando datos de ejemplo.', false);
+                
+                // Datos de ejemplo si no se puede cargar
+                allProperties = [
+                    {
+                        id_temporal: "UF000",
+                        titulo: "Casa en Parque Avellaneda",
+                        barrio: "Parque Avellaneda",
+                        precio: 169000,
+                        ambientes: 3,
+                        metros_cuadrados: 306,
+                        operacion: "venta",
+                        tipo: "casa",
+                        descripcion: "Ubicada en una zona tranquila y residencial.",
+                        direccion: "Espinillo al 1400",
+                        moneda_precio: "USD",
+                        pileta: "Si",
+                        cochera: "x",
+                        balcon: "x",
+                        acepta_mascotas: "Si",
+                        aire_acondicionado: "Si",
+                        fotos: ["imgs/UF000-1.jpeg"]
                     }
-                }, 100);
+                ];
+            }
+        }
+
+        // Función para agregar mensajes al chat
+        function showMessage(message, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.innerHTML = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Función para mostrar indicador de escritura
+        function showTyping() {
+            if (isTyping) return;
+            isTyping = true;
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot-message';
+            typingDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span style="color: #666; font-size: 0.9em;">Analizando...</span>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Función para ocultar indicador de escritura
+        function hideTyping() {
+            isTyping = false;
+            // Remover el último mensaje si es el indicador de typing
+            const chatMessages = document.getElementById('chatMessages');
+            const messages = chatMessages.querySelectorAll('.message');
+            if (messages.length > 0) {
+                const lastMessage = messages[messages.length - 1];
+                const typingDots = lastMessage.querySelector('.typing-dots');
+                if (typingDots) {
+                    chatMessages.removeChild(lastMessage);
+                }
+            }
+        }
+
+        // Procesamiento de consultas con IA
+        function processQuery(query) {
+            const lowerQuery = query.toLowerCase();
+            
+            // Simular procesamiento de IA
+            const filters = {
+                barrios: [],
+                tipos: [],
+                operaciones: [],
+                precio_max: null,
+                precio_min: null,
+                ambientes_min: null,
+                amenities: []
+            };
+
+            // Detectar barrios
+            const barriosMap = {
+                'palermo': 'Palermo',
+                'microcentro': 'Microcentro',
+                'recoleta': 'Recoleta',
+                'belgrano': 'Belgrano',
+                'núñez': 'Núñez',
+                'caballito': 'Caballito',
+                'parque avellaneda': 'Parque Avellaneda'
+            };
+            
+            for (const [key, value] of Object.entries(barriosMap)) {
+                if (lowerQuery.includes(key)) {
+                    filters.barrios.push(value);
+                    break;
+                }
+            }
+
+            // Detectar tipos
+            if (lowerQuery.includes('departamento') || lowerQuery.includes('depto')) {
+                filters.tipos.push('departamento');
+            } else if (lowerQuery.includes('casa')) {
+                filters.tipos.push('casa');
+            } else if (lowerQuery.includes('monoambiente') || lowerQuery.includes('1 ambiente')) {
+                filters.tipos.push('monoambiente');
+            }
+
+            // Detectar operación
+            if (lowerQuery.includes('venta') || lowerQuery.includes('comprar')) {
+                filters.operaciones.push('venta');
+            } else if (lowerQuery.includes('alquiler') || lowerQuery.includes('alquilar')) {
+                filters.operaciones.push('alquiler');
+            }
+
+            // Detectar precios
+            const numberMatches = query.match(/\d{3,6}/g);
+            if (numberMatches) {
+                const numbers = numberMatches.map(n => parseInt(n));
+                if (lowerQuery.includes('hasta') || lowerQuery.includes('menor') || lowerQuery.includes('máximo')) {
+                    filters.precio_max = Math.max(...numbers);
+                } else if (lowerQuery.includes('desde') || lowerQuery.includes('más')) {
+                    filters.precio_min = Math.min(...numbers);
+                } else if (numbers.length >= 2) {
+                    filters.precio_min = Math.min(...numbers);
+                    filters.precio_max = Math.max(...numbers);
+                }
+            }
+
+            // Detectar ambientes
+            const ambienteMatches = query.match(/(\d+)\s*ambiente/i);
+            if (ambienteMatches) {
+                filters.ambientes_min = parseInt(ambienteMatches[1]);
+            }
+
+            // Detectar amenities
+            if (lowerQuery.includes('pileta') || lowerQuery.includes('piscina')) {
+                filters.amenities.push('pileta');
+            }
+            if (lowerQuery.includes('cochera') || lowerQuery.includes('garage')) {
+                filters.amenities.push('cochera');
+            }
+            if (lowerQuery.includes('balcón') || lowerQuery.includes('balcon')) {
+                filters.amenities.push('balcon');
+            }
+            if (lowerQuery.includes('aire')) {
+                filters.amenities.push('aire');
+            }
+
+            return filters;
+        }
+
+        // Buscar propiedades con filtros
+        function searchProperties(filters) {
+            let results = allProperties.filter(property => {
+                // Filtrar por barrio
+                if (filters.barrios.length > 0 && !filters.barrios.includes(property.barrio)) {
+                    return false;
+                }
+
+                // Filtrar por tipo
+                if (filters.tipos.length > 0 && !filters.tipos.includes(property.tipo)) {
+                    return false;
+                }
+
+                // Filtrar por operación
+                if (filters.operaciones.length > 0 && !filters.operaciones.includes(property.operacion)) {
+                    return false;
+                }
+
+                // Filtrar por precio
+                if (filters.precio_min && property.precio < filters.precio_min) {
+                    return false;
+                }
+                if (filters.precio_max && property.precio > filters.precio_max) {
+                    return false;
+                }
+
+                // Filtrar por ambientes
+                if (filters.ambientes_min && property.ambientes < filters.ambientes_min) {
+                    return false;
+                }
+
+                // Filtrar por amenities
+                if (filters.amenities.length > 0) {
+                    for (const amenity of filters.amenities) {
+                        if (amenity === 'pileta' && property.pileta !== 'Si') return false;
+                        if (amenity === 'cochera' && property.cochera !== 'x') return false;
+                        if (amenity === 'balcon' && property.balcon !== 'x') return false;
+                        if (amenity === 'aire' && property.aire_acondicionado !== 'Si') return false;
+                    }
+                }
+
+                return true;
             });
+
+            return results;
         }
-    }
-    
-    // Inicializar funciones cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', function() {
-        setupWhatsAppFloat();
-        console.log('💬 Botón WhatsApp flotante configurado correctamente');
-    });
-    
-    // FUNCIONES TÉRMINOS Y CONDICIONES - DESHABILITADAS
-    /*
-    function mostrarTerminos() {
-        document.getElementById('modal-terminos').style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    }
-    
-    function cerrarModal() {
-        document.getElementById('modal-terminos').style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-    
-    // Cerrar modal al hacer clic fuera de él
-    window.onclick = function(event) {
-        const modal = document.getElementById('modal-terminos');
-        if (event.target == modal) {
-            cerrarModal();
-        }
-    }
-    
-    // Cerrar modal con tecla Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            cerrarModal();
-        }
-    });
-    */
-    </script>
-    
-    <!-- MODAL PARA GALERÍA DE IMÁGENES -->
-    <div class="image-modal" id="imageModal">
-        <div class="modal-content">
-            <div class="modal-info" id="modalInfo"></div>
-            <img class="modal-image" id="modalImage" src="" alt="">
-            <button class="modal-nav modal-prev" onclick="previousImage()">‹</button>
-            <button class="modal-nav modal-next" onclick="nextImage()">›</button>
-            <button class="modal-close" onclick="closeImageModal()">×</button>
-            <div class="modal-counter" id="modalCounter"></div>
-        </div>
-    </div>
-    
 
-<script>
-// Inicializar sistema de multimedia cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎬 Sistema de multimedia inicializado');
-    console.log('📄 Soporte para PDFs activado');
-    console.log('🎥 Soporte para videos activado');
-});
+        // Generar respuesta del bot
+        function generateBotResponse(results, query) {
+            if (results.length === 0) {
+                return `
+                    😅 *No encontré propiedades* con esos criterios.
 
-// Función global para cerrar modales multimedia
-function closeMultimediaModal() {
-    const modals = document.querySelectorAll('#pdf-modal, #video-modal');
-    modals.forEach(modal => {
-        // Detener videos antes de remover
-        const videos = modal.querySelectorAll('video');
-        videos.forEach(video => {
-            video.pause();
-            video.currentTime = 0;
-        });
-        modal.remove();
-    });
-    document.body.style.overflow = 'auto';
-}
+📋 *Tu búsqueda:* "${query}"
 
-// Cerrar modales multimedia con tecla Escape
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeMultimediaModal();
-    }
-});
+💡 *Sugerencias:*
+• Amplía el rango de precios
+• Busca en otros barrios
+• Consulta propiedades con menos amenidades
 
-// Cerrar modales multimedia al hacer clic fuera
-document.addEventListener('click', function(event) {
-    const pdfModal = document.getElementById('pdf-modal');
-    const videoModal = document.getElementById('video-modal');
-    
-    if (pdfModal && event.target === pdfModal) {
-        closeMultimediaModal();
-    }
-    if (videoModal && event.target === videoModal) {
-        closeMultimediaModal();
-    }
-});
-</script>
-
-    <!-- JavaScript del sistema -->
-    <script src="app.js"></script>
-    
-    <script>
-        console.log('🏠 Sistema Dante Propiedades - Versión Sin Errores + Slider cargando...');
-        console.log('✅ Sin dependencias de Font Awesome');
-        console.log('🎠 Slider de múltiples fotos incluido');
-        console.log('🔧 Sistema de emojis para iconos');
-        
-        // Función para buscar propiedades
-        function searchProperties() {
-            const operacion = document.getElementById('operacion-select-styled').value;
-            const barrio = document.getElementById('barrio-select-styled').value;
-            const tipo = document.getElementById('tipo-select-styled').value;
-            
-            console.log('🔍 Buscando propiedades con filtros:', { operacion, barrio, tipo });
-            
-            // Llamar a la función de búsqueda del app.js si existe
-            if (typeof window.loadProperties === 'function') {
-                window.loadProperties();
+¿Te gustaría intentar otra búsqueda? 😊
+                `;
             }
+
+            let response = `🔍 *Encontré ${results.length} propiedades*\n\n`;
+            
+            if (results.length <= 3) {
+                results.forEach((prop, index) => {
+                    response += `🏠 **${prop.titulo}**\n`;
+                    response += `📍 ${prop.barrio}\n`;
+                    response += `💰 $${prop.precio.toLocaleString()} ${prop.moneda_precio}\n`;
+                    response += `🛏️ ${prop.ambientes} amb | 📐 ${prop.metros_cuadrados} m²\n\n`;
+                });
+                
+                if (results.length === 1) {
+                    response += `✨ *¿Te interesa esta propiedad?*\n`;
+                    response += `Responde "más detalles" para información completa\n\n`;
+                } else {
+                    response += `💬 *¿Cuál te interesa más?*\n`;
+                    response += `Responde con el número (1, 2, 3...) para ver detalles\n\n`;
+                }
+            } else {
+                // Mostrar resumen de las primeras 3
+                results.slice(0, 3).forEach((prop, index) => {
+                    response += `${index + 1}. ${prop.titulo} - $${prop.precio.toLocaleString()} ${prop.moneda_precio}\n`;
+                });
+                
+                response += `\n📝 *Y ${results.length - 3} propiedades más...*\n\n`;
+                response += `💬 *Para ver todos los detalles:*\n`;
+                response += `• "Ver todas las propiedades"\n`;
+                response += `• "Mostrar por tipo: casa/departamento"\n`;
+                response += `• "Filtros avanzados"\n\n`;
+            }
+            
+            response += `🏢 Dante Propiedades\n📞 +54 11 2536-8595`;
+            
+            return response;
         }
-        
-        // Función para resetear filtros
+
+        // Procesar mensaje del usuario
+        function processUserMessage(message) {
+            if (message.trim() === '') return;
+
+            // Agregar mensaje del usuario
+            showMessage(message, true);
+            chatHistory.push(message);
+            
+            // Mostrar typing indicator
+            showTyping();
+            
+            // Procesar consulta
+            setTimeout(() => {
+                hideTyping();
+                
+                const filters = processQuery(message);
+                const results = searchProperties(filters);
+                const response = generateBotResponse(results, message);
+                
+                // Mostrar respuesta del bot
+                showMessage(response);
+                
+                // Mostrar resultados en la sección de propiedades
+                displayResults(results, results.length <= 3 ? results : results.slice(0, 6));
+                
+                // Scroll a resultados
+                document.getElementById('propertyResults').scrollIntoView({
+                    behavior: 'smooth'
+                });
+                
+            }, 1500 + Math.random() * 1000); // Simular tiempo de procesamiento
+        }
+
+        // Mostrar resultados de propiedades
+        function displayResults(results, displayResults) {
+            const resultsContainer = document.getElementById('propertyResults');
+            const statsElement = document.getElementById('searchStats');
+            const countElement = document.getElementById('resultsCount');
+            
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <h3>😔 No se encontraron propiedades</h3>
+                        <p>Intenta ajustar tus criterios de búsqueda</p>
+                        <div class="suggestions">
+                            <h4>💡 Sugerencias:</h4>
+                            <ul>
+                                <li>Amplía el rango de precios</li>
+                                <li>Busca en otros barrios</li>
+                                <li>Quita algunos filtros</li>
+                                <li>Consulta disponibilidad actual</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                statsElement.style.display = 'none';
+                return;
+            }
+            
+            // Mostrar estadísticas
+            statsElement.style.display = 'block';
+            countElement.textContent = results.length;
+            
+            // Generar HTML de resultados
+            let html = '';
+            displayResults.forEach(property => {
+                html += `
+                    <div class="property-card">
+                        <h3>${property.titulo}</h3>
+                        <img src="${getPropertyImage(property)}" alt="${property.titulo}" class="property-image" loading="lazy" />
+                        <div class="property-info">
+                            <div class="info-item">
+                                <span>📍</span>
+                                <span><strong>Ubicación:</strong> ${property.barrio}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>💰</span>
+                                <span><strong>Precio:</strong> $${property.precio.toLocaleString()} ${property.moneda_precio}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>🛏️</span>
+                                <span><strong>Ambientes:</strong> ${property.ambientes}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>📐</span>
+                                <span><strong>Superficie:</strong> ${property.metros_cuadrados} m²</span>
+                            </div>
+                            <div class="info-item">
+                                <span>🏢</span>
+                                <span><strong>Tipo:</strong> ${property.tipo.charAt(0).toUpperCase() + property.tipo.slice(1)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>💰</span>
+                                <span><strong>Operación:</strong> ${property.operacion.charAt(0).toUpperCase() + property.operacion.slice(1)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="property-amenities">
+                            ${property.pileta === 'Si' ? '<span class="amenity">🏊 Pileta</span>' : ''}
+                            ${property.cochera === 'x' ? '<span class="amenity">🚗 Cochera</span>' : ''}
+                            ${property.balcon === 'x' ? '<span class="amenity">🏞️ Balcón</span>' : ''}
+                            ${property.aire_acondicionado === 'Si' ? '<span class="amenity">❄️ Aire Acondicionado</span>' : ''}
+                            ${property.acepta_mascotas === 'Si' ? '<span class="amenity">🐕 Mascotas</span>' : ''}
+                        </div>
+                        
+                        ${property.descripcion ? `<p style="color: #666; margin-bottom: 15px;">${property.descripcion}</p>` : ''}
+                        
+                        <div class="property-actions">
+                            <a href="#" class="btn btn-primary" onclick="showPropertyDetails('${property.id_temporal}')">
+                                📸 Ver Fotos
+                            </a>
+                            <a href="formulario.html" class="btn btn-secondary">
+                                💬 Contactar
+                            </a>
+                            <a href="#" class="btn btn-secondary" onclick="saveToFavorites('${property.id_temporal}')">
+                                ❤️ Guardar
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (results.length > displayResults.length) {
+                html += `
+                    <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
+                        <p style="margin-bottom: 15px; color: #666;">
+                            📊 Mostrando ${displayResults.length} de ${results.length} propiedades encontradas
+                        </p>
+                        <button class="btn btn-primary" onclick="showAllResults()">
+                            📋 Ver Todas las Propiedades
+                        </button>
+                    </div>
+                `;
+            }
+            
+            resultsContainer.innerHTML = html;
+        }
+
+        // Funciones auxiliares
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            input.value = '';
+            processUserMessage(message);
+        }
+
+        function sendCommand(command) {
+            document.getElementById('messageInput').value = command;
+            sendMessage();
+        }
+
+        function advancedSearch() {
+            const filters = {
+                barrios: [document.getElementById('barrio-select').value],
+                tipos: [document.getElementById('tipo-select').value],
+                operaciones: [document.getElementById('operacion-select').value],
+                precio_min: parseInt(document.getElementById('precio-min').value) || null,
+                precio_max: parseInt(document.getElementById('precio-max').value) || null,
+                ambientes_min: parseInt(document.getElementById('ambientes-min').value) || null,
+                amenities: []
+            };
+            
+            // Filtrar valores vacíos
+            Object.keys(filters).forEach(key => {
+                if (filters[key] === '' || filters[key] === null) {
+                    filters[key] = [];
+                }
+            });
+            
+            const results = searchProperties(filters);
+            
+            // Mostrar en chat
+            showMessage(`🔍 Búsqueda avanzada realizada: ${filters.barrios.join(', ')} ${filters.tipos.join(', ')} ${filters.operaciones.join(', ')}`, true);
+            const response = generateBotResponse(results, 'búsqueda avanzada');
+            showMessage(response);
+            
+            // Mostrar resultados
+            displayResults(results, results.slice(0, 6));
+        }
+
         function resetFilters() {
-            document.getElementById('operacion-select-styled').value = '';
-            document.getElementById('barrio-select-styled').value = '';
-            document.getElementById('tipo-select-styled').value = '';
-            
-            console.log('🏠 Filtros reseteados - Mostrando todas las propiedades');
-            
-            // Llamar a la función de mostrar todas las propiedades
-            if (typeof window.loadProperties === 'function') {
-                window.loadProperties();
-            }
+            document.getElementById('barrio-select').value = '';
+            document.getElementById('tipo-select').value = '';
+            document.getElementById('operacion-select').value = '';
+            document.getElementById('precio-min').value = '';
+            document.getElementById('precio-max').value = '';
+            document.getElementById('ambientes-min').value = '';
         }
-        
-        // Verificación de carga de recursos
-        window.addEventListener('load', function() {
-            console.log('✅ Todos los recursos cargados correctamente');
-            console.log('🎯 Sistema completamente funcional');
+
+        function loadAllProperties() {
+            const results = allProperties;
+            showMessage('📋 Cargando todas las propiedades disponibles', true);
+            const response = generateBotResponse(results, 'todas las propiedades');
+            showMessage(response);
+            displayResults(results, results.slice(0, 9));
+        }
+
+        // Funciones adicionales
+        function showPropertyDetails(propertyId) {
+            showMessage(`🔍 Mostrando detalles de ${propertyId}`, true);
+            // Aquí se abriría un modal o redirigiría a la galería
+        }
+
+        function saveToFavorites(propertyId) {
+            showMessage(`❤️ Propiedad ${propertyId} guardada en favoritos`, true);
+        }
+
+        function showAllResults() {
+            const allResults = allProperties; // O los resultados de la última búsqueda
+            displayResults(allResults, allResults.slice(0, 12));
+        }
+
+        // Event listeners
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
         });
-    </script>
 
-
-    <!-- Botón de Chatbot Inteligente -->
-    <div style="position: fixed; bottom: 20px; left: 20px; z-index: 1000;">
-        <a href="busqueda_inteligente.html" 
-           style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                  color: white; 
-                  padding: 15px 20px; 
-                  border-radius: 25px; 
-                  text-decoration: none; 
-                  font-weight: 600;
-                  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-                  transition: all 0.3s ease;
-                  display: flex;
-                  align-items: center;
-                  gap: 8px;">
-            🤖 Búsqueda Inteligente
-        </a>
-    </div>
-    
-    <style>
-        @media (max-width: 768px) {
-            div[style*="position: fixed"] {
-                bottom: 80px !important;
-                left: 10px !important;
-            }
+        // SISTEMA DE IMÁGENES INTELIGENTE PARA PROPIEDADES
+        function obtenerImagenPropiedad(property) {
+            const imageMapping = {
+                // Casas
+                casa: [
+                    'imgs/casa_familiar_3.jpg',
+                    'imgs/casa_familiar_6.jpg', 
+                    'imgs/casa_familiar_8.jpg'
+                ],
+                // Departamentos
+                departamento: [
+                    'imgs/departamento_palermo_1.jpg',
+                    'imgs/departamento_palermo_4.jpg',
+                    'imgs/departamento_palermo_7.jpg'
+                ],
+                // Monoambientes
+                monoambiente: [
+                    'imgs/monoambiente_1.jpg',
+                    'imgs/monoambiente_3.jpg',
+                    'imgs/monoambiente_8.JPEG'
+                ],
+                // Apartamentos de lujo
+                apartamento: [
+                    'imgs/apartamento_lujo_0.jpg',
+                    'imgs/apartamento_lujo_2.jpg',
+                    'imgs/apartamento_lujo_7.jpg'
+                ],
+                // Edificios
+                edificio: [
+                    'imgs/edificio_1.jpg',
+                    'imgs/edificio_7.jpg',
+                    'imgs/edificio_8.jpg'
+                ]
+            };
             
-            div[style*="position: fixed"] a {
-                padding: 12px 16px !important;
-                font-size: 14px !important;
-            }
+            // Obtener imágenes según el tipo de propiedad
+            const tipo = property.tipo ? property.tipo.toLowerCase() : '';
+            const imagenes = imageMapping[tipo] || imageMapping['departamento']; // Default a departamentos
+            
+            // Seleccionar imagen basada en el ID para consistencia
+            const index = Math.abs(hashCode(property.id_temporal)) % imagenes.length;
+            return imagenes[index];
         }
-        
-        div[style*="position: fixed"] a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
-        }
-    </style>
 
-</body>
-</html> 
+        // Función hash simple para obtener un número consistente
+        function hashCode(str) {
+            let hash = 0;
+            if (str.length == 0) return hash;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return hash;
+        }
+
+        // Función para crear el HTML de la imagen de propiedad
+        function crearImagenPropiedadHTML(property) {
+            const imagenSrc = obtenerImagenPropiedad(property);
+            
+            return `
+                <div class="property-image">
+                    <img src="${imagenSrc}" 
+                         alt="${property.titulo}" 
+                         onerror="this.src='imgs/imagen-propiedad.svg'"
+                         onclick="showPropertyDetails('${property.id_temporal}')">
+                </div>
+            `;
+        }
+
+        // Inicializar
+        window.onload = function() {
+            loadProperties();
+            document.getElementById('messageInput').focus();
+        };
+    </script>
