@@ -661,36 +661,89 @@
             });
         }
 
-        // Cargar propiedades al inicializar (CON SISTEMA DINÁMICO)
+        // Cargar propiedades usando XMLHttpRequest para evitar CORS
+        function cargarPropiedadesConXHR() {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                
+                console.log('🔄 Intentando cargar propiedades.json con XMLHttpRequest...');
+                
+                // Intentar cargar propiedades.json
+                xhr.open('GET', 'propiedades.json', true);
+                
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            console.log(`✅ JSON cargado exitosamente:`, data);
+                            resolve(data);
+                        } catch (e) {
+                            console.error('Error parsing JSON:', e);
+                            reject(new Error('Error al parsear el archivo JSON'));
+                        }
+                    } else {
+                        console.error(`Error HTTP: ${xhr.status}`);
+                        reject(new Error(`Error HTTP: ${xhr.status}`));
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    console.error('Error de red al cargar propiedades.json');
+                    reject(new Error('Error de red al cargar propiedades'));
+                };
+                
+                xhr.ontimeout = function() {
+                    console.error('Timeout al cargar propiedades.json');
+                    reject(new Error('Timeout al cargar propiedades'));
+                };
+                
+                xhr.timeout = 10000; // 10 segundos timeout
+                xhr.send();
+            });
+        }
+
+        // Cargar propiedades al inicializar
         async function loadProperties() {
             try {
-                // Esperar a que el sistema dinámico se inicialice
-                await inicializarSistemaDinamico();
+                console.log('🚀 Iniciando carga de propiedades...');
                 
-                // Usar propiedades del sistema dinámico
-                allProperties = sistemaPropiedades.propiedades;
-                console.log(`✅ Cargadas ${allProperties.length} propiedades con sistema dinámico`);
+                // Usar XMLHttpRequest para evitar problemas de CORS
+                const propiedadesData = await cargarPropiedadesConXHR();
                 
-                // Llenar filtros dinámicamente usando app.js
-                llenarFiltrosDinamicos();
-
-                // Event listeners para mejorar la experiencia de filtros
-                addFilterEventListeners();
+                if (!propiedadesData || propiedadesData.length === 0) {
+                    throw new Error('No se encontraron propiedades en el archivo');
+                }
                 
-                // Mostrar mensaje inicial con estadísticas dinámicas
-                const tiposCount = sistemaPropiedades.tiposDisponibles.length;
-                const barriosCount = sistemaPropiedades.barriosDisponibles.length;
-                const amenidadesCount = sistemaPropiedades.amenidadesDisponibles.length;
+                // Configurar propiedades globales
+                allProperties = propiedadesData;
+                
+                console.log(`✅ Cargadas ${allProperties.length} propiedades correctamente`);
+                
+                // Mostrar estadísticas en el chat
+                const tipos = [...new Set(allProperties.map(p => p.tipo))];
+                const barrios = [...new Set(allProperties.map(p => p.barrio))];
+                const operaciones = [...new Set(allProperties.map(p => p.operacion))];
                 
                 showMessage(`¡Hola! 👋 Te ayudo a encontrar tu propiedad ideal.`, false);
-                showMessage(`📊 Tengo ${allProperties.length} propiedades con ${tiposCount} tipos diferentes, ${barriosCount} barrios y ${amenidadesCount} amenidades.`, false);
-                showMessage('🔍 Puedes buscar por texto libre o usar la búsqueda avanzada de abajo.', false);
+                showMessage(`📊 Tengo **${allProperties.length} propiedades** disponibles:`, false);
+                showMessage(`• 🏷️ Tipos: ${tipos.join(', ')}`, false);
+                showMessage(`• 📍 Barrios: ${barrios.join(', ')}`, false);
+                showMessage(`• 💼 Operaciones: ${operaciones.join(', ')}`, false);
+                showMessage('🔍 Usa navegación numérica (1, 2, 3, 0) o busca por texto libre.', false);
+                
+                // Llenar filtros dinámicamente
+                llenarFiltrosDinamicos();
+                
+                // Event listeners para filtros
+                addFilterEventListeners();
                 
             } catch (error) {
-                console.error('Error cargando propiedades:', error);
-                showMessage('❌ Error cargando propiedades. Usando datos de ejemplo.', false);
+                console.error('❌ Error cargando propiedades:', error);
+                showMessage('❌ Error cargando propiedades desde JSON', false);
+                showMessage(`🔧 Detalles: ${error.message}`, false);
+                showMessage('💡 Si usas file://, algunos navegadores bloquean archivos externos. Intenta con un servidor.', false);
                 
-                // Datos de ejemplo si no se puede cargar
+                // Datos de ejemplo en caso de error
                 allProperties = [
                     {
                         id_temporal: "UF000",
@@ -847,14 +900,50 @@
             return filters;
         }
 
-        // Buscar propiedades con filtros (SISTEMA DINÁMICO)
+        // Función para mostrar información de debug
+        function mostrarDebug(mensaje) {
+            console.log(`🔍 [DEBUG]: ${mensaje}`);
+            // También podrías mostrar en la interfaz si quieres
+        }
+
+        // Función mejorada para buscar propiedades
         function searchProperties(filters) {
-            // Usar el sistema dinámico para filtrar
-            const results = obtenerPropiedadesFiltradas(filters);
+            mostrarDebug(`Buscando con filtros: ${JSON.stringify(filters)}`);
             
-            console.log(`🔍 Búsqueda completada: ${results.length} propiedades encontradas`);
-            console.log('Filtros aplicados:', filters);
+            let results = allProperties;
             
+            // Aplicar filtros uno por uno para debugging
+            if (filters.barrios && filters.barrios.length > 0) {
+                results = results.filter(p => filters.barrios.includes(p.barrio));
+                mostrarDebug(`Después del filtro barrios: ${results.length} resultados`);
+            }
+            
+            if (filters.tipos && filters.tipos.length > 0) {
+                results = results.filter(p => filters.tipos.includes(p.tipo));
+                mostrarDebug(`Después del filtro tipos: ${results.length} resultados`);
+            }
+            
+            if (filters.operaciones && filters.operaciones.length > 0) {
+                results = results.filter(p => filters.operaciones.includes(p.operacion));
+                mostrarDebug(`Después del filtro operaciones: ${results.length} resultados`);
+            }
+            
+            if (filters.precio_min !== null && filters.precio_min !== undefined) {
+                results = results.filter(p => p.precio && p.precio >= filters.precio_min);
+                mostrarDebug(`Después del filtro precio_min: ${results.length} resultados`);
+            }
+            
+            if (filters.precio_max !== null && filters.precio_max !== undefined) {
+                results = results.filter(p => p.precio && p.precio <= filters.precio_max);
+                mostrarDebug(`Después del filtro precio_max: ${results.length} resultados`);
+            }
+            
+            if (filters.ambientes_min !== null && filters.ambientes_min !== undefined) {
+                results = results.filter(p => p.ambientes && p.ambientes >= filters.ambientes_min);
+                mostrarDebug(`Después del filtro ambientes_min: ${results.length} resultados`);
+            }
+            
+            mostrarDebug(`Búsqueda completada: ${results.length} propiedades encontradas`);
             return results;
         }
 
@@ -911,8 +1000,7 @@
         }
 
         // Procesar mensaje del usuario
-        // Inicializar sistema de navegación modular
-        const navChatbot = new window.SistemaMenus.SistemaNavegacion();
+        // Usar sistema modular global
         let modoNavegacion = 'menu'; // 'menu' o 'busqueda'
         let propiedadSeleccionada = null;
 
@@ -931,7 +1019,14 @@
                 hideTyping();
                 
                 if (modoNavegacion === 'menu') {
-                    procesarConMenu(message);
+                    // Usar el sistema modular para procesar la respuesta
+                    const respuesta = window.SistemaMenus.procesarMensaje(message);
+                    if (respuesta.tipo === 'menu') {
+                        showMessage(respuesta.contenido, false);
+                    } else if (respuesta.tipo === 'accion') {
+                        // Ejecutar la acción solicitada
+                        ejecutarAccion(respuesta.accion);
+                    }
                 } else {
                     procesarBusquedaTradicional(message);
                 }
@@ -939,71 +1034,102 @@
             }, 800); // Tiempo de procesamiento reducido para mejor UX
         }
 
-        function procesarConMenu(message) {
-            const respuesta = navChatbot.procesarRespuesta(message);
+        // Función para ejecutar acciones del menú
+        function ejecutarAccion(accion) {
+            console.log('🎯 Ejecutando acción:', accion);
             
-            if (respuesta.error) {
-                showMessage(respuesta.error);
-                return;
-            }
-            
-            const { indice, texto, accion } = respuesta;
-            
-            // Manejar acción específica
-            switch (accion) {
-                case 'BUSCAR':
-                    const menuBusqueda = navChatbot.mostrarMenu('busqueda');
-                    showMessage(menuBusqueda);
+            switch(accion.tipo) {
+                case 'buscar':
+                    const menuBusqueda = window.SistemaMenus.obtenerMenu('busqueda');
+                    showMessage(menuBusqueda.contenido, false);
                     break;
                     
-                case 'VER_TODAS':
-                    modoNavegacion = 'busqueda';
-                    const resultados = sistemaPropiedades.propiedades;
-                    mostrarResultadosConMenu(resultados, 'Todas las propiedades');
+                case 'mostrar_todas':
+                    displayResults(sistemaPropiedades.propiedades, sistemaPropiedades.propiedades.slice(0, 12));
+                    showMessage("🏠 Mostrando todas las propiedades disponibles", false);
+                    modoNavegacion = 'menu';
                     break;
                     
-                case 'AYUDA':
-                    showMessage(`📋 AYUDA:
-                    
-Te ayudo a encontrar propiedades de manera simple.
-
-1️⃣ Escribe solo números para navegar
-2️⃣ Siempre puedes volver con "volver"  
-3️⃣ En cualquier momento puedes pedir ayuda
-
-¿Qué quieres hacer ahora?
-1. Buscar propiedad
-2. Ver todas las propiedades
-3. Ayuda`);
+                case 'ayuda':
+                    const menuAyuda = window.SistemaMenus.obtenerMenu('ayuda');
+                    showMessage(menuAyuda.contenido, false);
                     break;
                     
-                case 'POR_TIPO':
-                    const menuTipos = navChatbot.mostrarMenu('tipos');
-                    showMessage(menuTipos);
+                case 'filtrar_tipo':
+                    const menuTipos = window.SistemaMenus.obtenerMenu('tipos');
+                    showMessage(menuTipos.contenido, false);
                     break;
                     
-                case 'FILTRAR_CASA':
-                case 'FILTRAR_DEPARTAMENTO':
-                case 'FILTRAR_LOCAL':
-                case 'FILTRAR_OFICINA':
-                    filtrarPorTipo(accion.replace('FILTRAR_', '').toLowerCase());
+                case 'filtrar_barrio':
+                    const barrios = [...new Set(sistemaPropiedades.propiedades.map(p => p.barrio))].sort();
+                    let menuBarrios = "📍 Selecciona un barrio:\n";
+                    barrios.forEach((barrio, index) => {
+                        menuBarrios += `${index + 1}. ${barrio}\n`;
+                    });
+                    menuBarrios += "\n0. Volver al menú principal";
+                    showMessage(menuBarrios, false);
                     break;
                     
-                case 'VOLVER':
-                    if (navChatbot.historico.length > 1) {
-                        navChatbot.historico.pop();
-                        const menuAnterior = navChatbot.historico[navChatbot.historico.length - 1];
-                        const menu = navChatbot.mostrarMenu(menuAnterior);
-                        showMessage(menu);
-                    } else {
-                        const menuPrincipal = navChatbot.mostrarMenu('principal');
-                        showMessage(menuPrincipal);
-                    }
+                case 'filtrar_precio':
+                    showMessage("💰 Rango de precios disponibles:\n1. Hasta $100,000 USD\n2. $100,000 - $300,000 USD\n3. $300,000 - $500,000 USD\n4. Más de $500,000 USD\n\n0. Volver al menú principal", false);
+                    break;
+                    
+                case 'tipo_seleccionado':
+                    const tipo = accion.valor;
+                    const propiedadesTipo = sistemaPropiedades.propiedades.filter(p => 
+                        p.tipo.toLowerCase() === tipo.toLowerCase()
+                    );
+                    displayResults(propiedadesTipo, propiedadesTipo.slice(0, 12));
+                    showMessage(`🏠 Mostrando ${propiedadesTipo.length} propiedades tipo "${tipo}"`, false);
+                    modoNavegacion = 'menu';
+                    break;
+                    
+                case 'barrio_seleccionado':
+                    const barrio = accion.valor;
+                    const propiedadesBarrio = sistemaPropiedades.propiedades.filter(p => p.barrio === barrio);
+                    displayResults(propiedadesBarrio, propiedadesBarrio.slice(0, 12));
+                    showMessage(`📍 Mostrando ${propiedadesBarrio.length} propiedades en "${barrio}"`, false);
+                    modoNavegacion = 'menu';
+                    break;
+                    
+                case 'precio_seleccionado':
+                    const rango = accion.rango;
+                    const [min, max] = rango;
+                    const propiedadesPrecio = sistemaPropiedades.propiedades.filter(p => {
+                        const precio = p.precio || 0;
+                        return precio >= min && (max === Infinity || precio <= max);
+                    });
+                    displayResults(propiedadesPrecio, propiedadesPrecio.slice(0, 12));
+                    showMessage(`💰 Mostrando ${propiedadesPrecio.length} propiedades en el rango $${min.toLocaleString()} - ${max === Infinity ? '∞' : '$' + max.toLocaleString()} USD`, false);
+                    modoNavegacion = 'menu';
+                    break;
+                    
+                case 'volver_menu':
+                    const menuPrincipal = window.SistemaMenus.obtenerMenu('principal');
+                    showMessage(menuPrincipal.contenido, false);
+                    modoNavegacion = 'menu';
                     break;
                     
                 default:
-                    showMessage("🤖 Opción procesada correctamente. Continúa navegando con números.");
+                    showMessage("❓ Opción no válida. Escribe un número del menú.", false);
                     break;
+            }
+        }
+
+        function procesarConMenu(message) {
+            // Usar el sistema modular para procesar la respuesta
+            const respuesta = window.SistemaMenus.procesarMensaje(message);
+            
+            if (respuesta.error) {
+                showMessage(respuesta.error, false);
+                return;
+            }
+            
+            if (respuesta.tipo === 'menu') {
+                showMessage(respuesta.contenido, false);
+            } else if (respuesta.tipo === 'accion') {
+                // Ejecutar la acción solicitada
+                ejecutarAccion(respuesta.accion);
             }
         }
 
@@ -1186,6 +1312,90 @@ Te ayudo a encontrar propiedades de manera simple.
         function sendCommand(command) {
             document.getElementById('messageInput').value = command;
             sendMessage();
+        }
+
+        // Llenar filtros dinámicamente
+        function llenarFiltrosDinamicos() {
+            try {
+                console.log('📋 Llenando filtros dinámicamente...');
+                
+                const barrioSelect = document.getElementById('barrio-select');
+                const tipoSelect = document.getElementById('tipo-select');
+                
+                // Obtener valores únicos
+                const barrios = [...new Set(allProperties.map(p => p.barrio))].sort();
+                const tipos = [...new Set(allProperties.map(p => p.tipo))].sort();
+                
+                // Limpiar y llenar select de barrios
+                barrioSelect.innerHTML = '<option value="">Todos los barrios</option>';
+                barrios.forEach(barrio => {
+                    const option = document.createElement('option');
+                    option.value = barrio;
+                    option.textContent = barrio;
+                    barrioSelect.appendChild(option);
+                });
+                
+                // Limpiar y llenar select de tipos
+                tipoSelect.innerHTML = '<option value="">Todos los tipos</option>';
+                tipos.forEach(tipo => {
+                    const option = document.createElement('option');
+                    option.value = tipo;
+                    option.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+                    tipoSelect.appendChild(option);
+                });
+                
+                console.log(`✅ Filtros llenados: ${barrios.length} barrios, ${tipos.length} tipos`);
+                
+            } catch (error) {
+                console.error('❌ Error llenando filtros:', error);
+            }
+        }
+
+        // Obtener propiedades filtradas
+        function obtenerPropiedadesFiltradas(filters) {
+            return allProperties.filter(property => {
+                // Filtro por barrios
+                if (filters.barrios && filters.barrios.length > 0) {
+                    if (!filters.barrios.includes(property.barrio)) return false;
+                }
+                
+                // Filtro por tipos
+                if (filters.tipos && filters.tipos.length > 0) {
+                    if (!filters.tipos.includes(property.tipo)) return false;
+                }
+                
+                // Filtro por operaciones
+                if (filters.operaciones && filters.operaciones.length > 0) {
+                    if (!filters.operaciones.includes(property.operacion)) return false;
+                }
+                
+                // Filtro por precio mínimo
+                if (filters.precio_min !== null && filters.precio_min !== undefined) {
+                    if (!property.precio || property.precio < filters.precio_min) return false;
+                }
+                
+                // Filtro por precio máximo
+                if (filters.precio_max !== null && filters.precio_max !== undefined) {
+                    if (!property.precio || property.precio > filters.precio_max) return false;
+                }
+                
+                // Filtro por ambientes mínimos
+                if (filters.ambientes_min !== null && filters.ambientes_min !== undefined) {
+                    if (!property.ambientes || property.ambientes < filters.ambientes_min) return false;
+                }
+                
+                // Filtro por amenities
+                if (filters.amenities && filters.amenities.length > 0) {
+                    for (let amenity of filters.amenities) {
+                        if (amenity === 'pileta' && property.pileta !== 'Si') return false;
+                        if (amenity === 'cochera' && property.cochera !== 'x') return false;
+                        if (amenity === 'balcon' && property.balcon !== 'x') return false;
+                        if (amenity === 'aire' && property.aire_acondicionado !== 'Si') return false;
+                    }
+                }
+                
+                return true;
+            });
         }
 
         function advancedSearch() {
@@ -1598,20 +1808,30 @@ ID Propiedad: ${property.id_temporal}`;
             console.log("✅ Funciones globales definidas correctamente");
         }
 
-        // Inicializar sistema dinámico
-        window.onload = function() {
+        // Función para obtener imagen de propiedad
+        function obtenerImagenPropiedad(property) {
+            if (property.fotos && property.fotos.length > 0) {
+                return property.fotos[0];
+            }
+            // Imagen por defecto si no hay fotos
+            return 'imgs/imagen-propiedad.svg';
+        }
+
+        // Inicializar sistema cuando la página cargue
+        window.addEventListener('load', function() {
+            console.log('🚀 Página cargada, inicializando sistema...');
+            
+            // Cargar propiedades
             loadProperties();
+            
+            // Enfocar input del chat
             document.getElementById('messageInput').focus();
             
-            // Definir funciones globales DESPUÉS de que todo esté cargado
+            // Definir funciones globales después de cargar
             setTimeout(definirFuncionesGlobales, 100);
             
-            // Inicializar menú principal del chatbot
-            setTimeout(() => {
-                const menuPrincipal = navChatbot.mostrarMenu('principal');
-                // No mostrar automáticamente, dejar que el usuario interactúe
-            }, 200);
-        };
+            console.log('✅ Sistema inicializado correctamente');
+        });
     </script>
     <script src="app.js"></script>
     <script src="sistema_menus.js"></script>
