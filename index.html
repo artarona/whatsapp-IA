@@ -661,38 +661,29 @@
             });
         }
 
-        // Cargar propiedades al inicializar
+        // Cargar propiedades al inicializar (CON SISTEMA DINÁMICO)
         async function loadProperties() {
             try {
-                const response = await fetch('propiedades.json');
-                allProperties = await response.json();
-                console.log(`✅ Cargadas ${allProperties.length} propiedades`);
+                // Esperar a que el sistema dinámico se inicialice
+                await inicializarSistemaDinamico();
                 
-                // Llenar filtros de barrios
-                const barrios = [...new Set(allProperties.map(p => p.barrio))].sort();
-                const barrioSelect = document.getElementById('barrio-select');
-                barrios.forEach(barrio => {
-                    const option = document.createElement('option');
-                    option.value = barrio;
-                    option.textContent = barrio;
-                    barrioSelect.appendChild(option);
-                });
+                // Usar propiedades del sistema dinámico
+                allProperties = sistemaPropiedades.propiedades;
+                console.log(`✅ Cargadas ${allProperties.length} propiedades con sistema dinámico`);
                 
-                // Llenar filtros de tipos
-                const tipos = [...new Set(allProperties.map(p => p.tipo))].sort();
-                const tipoSelect = document.getElementById('tipo-select');
-                tipos.forEach(tipo => {
-                    const option = document.createElement('option');
-                    option.value = tipo;
-                    option.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
-                    tipoSelect.appendChild(option);
-                });
+                // Llenar filtros dinámicamente usando app.js
+                llenarFiltrosDinamicos();
 
                 // Event listeners para mejorar la experiencia de filtros
                 addFilterEventListeners();
                 
-                // Mostrar mensaje inicial
-                showMessage(`¡Hola! 👋 Te ayudo a encontrar tu propiedad ideal. Actualmente tengo ${allProperties.length} propiedades disponibles.`, false);
+                // Mostrar mensaje inicial con estadísticas dinámicas
+                const tiposCount = sistemaPropiedades.tiposDisponibles.length;
+                const barriosCount = sistemaPropiedades.barriosDisponibles.length;
+                const amenidadesCount = sistemaPropiedades.amenidadesDisponibles.length;
+                
+                showMessage(`¡Hola! 👋 Te ayudo a encontrar tu propiedad ideal.`, false);
+                showMessage(`📊 Tengo ${allProperties.length} propiedades con ${tiposCount} tipos diferentes, ${barriosCount} barrios y ${amenidadesCount} amenidades.`, false);
                 showMessage('🔍 Puedes buscar por texto libre o usar la búsqueda avanzada de abajo.', false);
                 
             } catch (error) {
@@ -856,50 +847,14 @@
             return filters;
         }
 
-        // Buscar propiedades con filtros
+        // Buscar propiedades con filtros (SISTEMA DINÁMICO)
         function searchProperties(filters) {
-            let results = allProperties.filter(property => {
-                // Filtrar por barrio
-                if (filters.barrios.length > 0 && !filters.barrios.includes(property.barrio)) {
-                    return false;
-                }
-
-                // Filtrar por tipo
-                if (filters.tipos.length > 0 && !filters.tipos.includes(property.tipo)) {
-                    return false;
-                }
-
-                // Filtrar por operación
-                if (filters.operaciones.length > 0 && !filters.operaciones.includes(property.operacion)) {
-                    return false;
-                }
-
-                // Filtrar por precio
-                if (filters.precio_min && property.precio < filters.precio_min) {
-                    return false;
-                }
-                if (filters.precio_max && property.precio > filters.precio_max) {
-                    return false;
-                }
-
-                // Filtrar por ambientes
-                if (filters.ambientes_min && property.ambientes < filters.ambientes_min) {
-                    return false;
-                }
-
-                // Filtrar por amenities
-                if (filters.amenities.length > 0) {
-                    for (const amenity of filters.amenities) {
-                        if (amenity === 'pileta' && property.pileta !== 'Si') return false;
-                        if (amenity === 'cochera' && property.cochera !== 'x') return false;
-                        if (amenity === 'balcon' && property.balcon !== 'x') return false;
-                        if (amenity === 'aire' && property.aire_acondicionado !== 'Si') return false;
-                    }
-                }
-
-                return true;
-            });
-
+            // Usar el sistema dinámico para filtrar
+            const results = obtenerPropiedadesFiltradas(filters);
+            
+            console.log(`🔍 Búsqueda completada: ${results.length} propiedades encontradas`);
+            console.log('Filtros aplicados:', filters);
+            
             return results;
         }
 
