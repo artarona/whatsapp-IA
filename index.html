@@ -1162,8 +1162,217 @@
 
         // Funciones adicionales
         function showPropertyDetails(propertyId) {
-            showMessage(`🔍 Mostrando detalles de ${propertyId}`, true);
-            // Aquí se abriría un modal o redirigiría a la galería
+            // Buscar la propiedad en el sistema dinámico
+            const property = sistemaPropiedades.propiedades.find(p => p.id_temporal === propertyId);
+            
+            if (!property) {
+                showMessage(`❌ No se encontró la propiedad ${propertyId}`, false);
+                return;
+            }
+            
+            // Crear y mostrar modal con fotos
+            crearModalFotos(property);
+        }
+
+        // Crear modal dinámico para mostrar fotos de la propiedad
+        function crearModalFotos(property) {
+            // Cerrar modal existente si está abierto
+            const existingModal = document.getElementById('fotosModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Verificar que la propiedad tenga fotos
+            if (!property.fotos || property.fotos.length === 0) {
+                showMessage(`📷 La propiedad ${property.titulo} no tiene fotos disponibles`, true);
+                return;
+            }
+            
+            // Crear modal HTML
+            const modalHTML = `
+                <div id="fotosModal" style="
+                    position: fixed; 
+                    top: 0; 
+                    left: 0; 
+                    width: 100%; 
+                    height: 100%; 
+                    background: rgba(0,0,0,0.8); 
+                    z-index: 10000;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                " onclick="cerrarModal()">
+                    <div style="
+                        background: white; 
+                        padding: 20px; 
+                        border-radius: 10px; 
+                        max-width: 90vw; 
+                        max-height: 90vh;
+                        overflow: auto;
+                        position: relative;
+                    " onclick="event.stopPropagation()">
+                        
+                        <!-- Botón cerrar -->
+                        <button onclick="cerrarModal()" style="
+                            position: absolute; 
+                            top: 10px; 
+                            right: 15px; 
+                            background: #ff4444; 
+                            color: white; 
+                            border: none; 
+                            border-radius: 50%; 
+                            width: 30px; 
+                            height: 30px; 
+                            cursor: pointer;
+                            font-size: 16px;
+                            z-index: 10001;
+                        ">×</button>
+                        
+                        <!-- Título -->
+                        <h2 style="margin: 0 0 20px 0; color: #333;">📸 ${property.titulo}</h2>
+                        
+                        <!-- Información básica -->
+                        <div style="margin-bottom: 20px; color: #666;">
+                            <p><strong>📍 Ubicación:</strong> ${property.barrio}</p>
+                            <p><strong>💰 Precio:</strong> $${property.precio ? property.precio.toLocaleString() : 'N/A'} ${property.moneda_precio || 'USD'}</p>
+                            <p><strong>🏢 Tipo:</strong> ${property.tipo ? property.tipo.charAt(0).toUpperCase() + property.tipo.slice(1) : 'N/A'}</p>
+                            <p><strong>🛏️ Ambientes:</strong> ${property.ambientes || 'N/A'}</p>
+                            <p><strong>📐 Superficie:</strong> ${property.metros_cuadrados || 'N/A'} m²</p>
+                        </div>
+                        
+                        <!-- Galería de fotos -->
+                        <div style="
+                            display: grid; 
+                            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+                            gap: 15px;
+                            margin-top: 20px;
+                        ">
+                            ${property.fotos.map((foto, index) => `
+                                <div style="text-align: center;">
+                                    <img src="${foto}" 
+                                         alt="Foto ${index + 1} de ${property.titulo}" 
+                                         style="
+                                             width: 100%; 
+                                             height: 200px; 
+                                             object-fit: cover; 
+                                             border-radius: 8px; 
+                                             cursor: pointer;
+                                             transition: transform 0.3s ease;
+                                         "
+                                         onmouseover="this.style.transform='scale(1.05)'"
+                                         onmouseout="this.style.transform='scale(1)'"
+                                         onclick="ampliarFoto('${foto}', '${property.titulo}', ${index + 1}, ${property.fotos.length})"
+                                         onerror="this.src='imgs/imagen-propiedad.svg'">
+                                    <p style="margin: 8px 0 0 0; color: #888; font-size: 12px;">
+                                        Foto ${index + 1} de ${property.fotos.length}
+                                    </p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <!-- Controles de navegación -->
+                        ${property.fotos.length > 1 ? `
+                            <div style="margin-top: 20px; text-align: center;">
+                                <p style="color: #666; font-style: italic;">
+                                    Click en cualquier foto para ampliar • ${property.fotos.length} fotos disponibles
+                                </p>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Agregar modal al DOM
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Mostrar mensaje de confirmación
+            showMessage(`📸 Mostrando ${property.fotos.length} fotos de "${property.titulo}"`, true);
+        }
+
+        // Función para cerrar modal
+        function cerrarModal() {
+            const modal = document.getElementById('fotosModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Función para ampliar foto individual
+        function ampliarFoto(fotoSrc, titulo, numeroFoto, totalFotos) {
+            // Crear modal de foto ampliada
+            const modalHTML = `
+                <div id="fotoAmpliadaModal" style="
+                    position: fixed; 
+                    top: 0; 
+                    left: 0; 
+                    width: 100%; 
+                    height: 100%; 
+                    background: rgba(0,0,0,0.95); 
+                    z-index: 10002;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                " onclick="cerrarFotoAmpliada()">
+                    <div style="position: relative; max-width: 90vw; max-height: 90vh;">
+                        <img src="${fotoSrc}" 
+                             alt="Foto ${numeroFoto} de ${titulo}" 
+                             style="
+                                 max-width: 100%; 
+                                 max-height: 100%; 
+                                 object-fit: contain;
+                                 border-radius: 8px;
+                             ">
+                        
+                        <!-- Controles -->
+                        <div style="
+                            position: absolute; 
+                            top: 20px; 
+                            right: 20px; 
+                            display: flex; 
+                            gap: 10px;
+                        ">
+                            <button onclick="cerrarFotoAmpliada()" style="
+                                background: rgba(0,0,0,0.7); 
+                                color: white; 
+                                border: none; 
+                                border-radius: 50%; 
+                                width: 40px; 
+                                height: 40px; 
+                                cursor: pointer;
+                                font-size: 20px;
+                            ">×</button>
+                        </div>
+                        
+                        <!-- Información de la foto -->
+                        <div style="
+                            position: absolute; 
+                            bottom: 20px; 
+                            left: 20px; 
+                            background: rgba(0,0,0,0.7); 
+                            color: white; 
+                            padding: 10px 15px; 
+                            border-radius: 5px;
+                            font-size: 14px;
+                        ">
+                            ${titulo} - Foto ${numeroFoto} de ${totalFotos}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Cerrar modal de galería primero
+            cerrarModal();
+            
+            // Agregar modal de foto ampliada
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        // Función para cerrar foto ampliada
+        function cerrarFotoAmpliada() {
+            const modal = document.getElementById('fotoAmpliadaModal');
+            if (modal) {
+                modal.remove();
+            }
         }
 
         function saveToFavorites(propertyId) {
