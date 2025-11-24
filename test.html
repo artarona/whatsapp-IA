@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sistema Chatbot</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f5f5f5; 
+        }
+        .test-result { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb; 
+        }
+        #console-log { 
+            background: #000; 
+            color: #0f0; 
+            padding: 15px; 
+            border-radius: 5px; 
+            font-family: monospace; 
+            white-space: pre-wrap; 
+            max-height: 300px; 
+            overflow-y: auto; 
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Sistema Chatbot Dante Propiedades</h1>
+    
+    <div id="test-results"></div>
+    
+    <h2>📋 Console Log</h2>
+    <div id="console-log"></div>
+
+    <script>
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        const logContainer = document.getElementById('console-log');
+        
+        function addToLog(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6b6b' : type === 'warn' ? '#ffd93d' : '#51cf66';
+            logContainer.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToLog(args.join(' '));
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToLog('ERROR: ' + args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToLog('WARNING: ' + args.join(' '), 'warn');
+        };
+
+        function addTestResult(test, success, message) {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${success ? 'success' : 'error'}`;
+            resultDiv.innerHTML = `${success ? '✅' : '❌'} <strong>${test}</strong>: ${message}`;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        async function runTests() {
+            console.log('🚀 Iniciando tests del sistema...');
+            
+            try {
+                // Test 1: Cargar archivos JS
+                console.log('📂 Test 1: Cargando archivos JavaScript...');
+                const scripts = [
+                    'js/config.js',
+                    'js/utils.js', 
+                    'js/property-manager.js',
+                    'js/chatbot.js',
+                    'js/menu-system.js',
+                    'js/gallery.js',
+                    'js/favorites.js'
+                ];
+                
+                for (const script of scripts) {
+                    const response = await fetch(script);
+                    if (response.ok) {
+                        console.log(`✅ ${script} - OK`);
+                    } else {
+                        throw new Error(`${script} no disponible`);
+                    }
+                }
+                
+                // Test 2: Verificar que existe propiedades.json
+                console.log('📄 Test 2: Verificando propiedades.json...');
+                const propiedadesResponse = await fetch('propiedades.json');
+                if (propiedadesResponse.ok) {
+                    const propiedades = await propiedadesResponse.json();
+                    console.log(`✅ propiedades.json cargado - ${propiedades.length} propiedades`);
+                    
+                    // Test 3: Verificar imágenes
+                    console.log('🖼️ Test 3: Verificando imágenes...');
+                    let imagesOk = 0;
+                    let totalImages = 0;
+                    
+                    for (const prop of propiedades.slice(0, 2)) { // Solo primeras 2 propiedades
+                        if (prop.fotos) {
+                            for (const foto of prop.fotos.slice(0, 3)) { // Solo primeras 3 fotos
+                                totalImages++;
+                                try {
+                                    const imgResponse = await fetch(foto);
+                                    if (imgResponse.ok) {
+                                        imagesOk++;
+                                        console.log(`✅ ${foto}`);
+                                    }
+                                } catch (e) {
+                                    console.log(`❌ ${foto} - Error`);
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (imagesOk === totalImages) {
+                        addTestResult('Carga de Imágenes', true, `${imagesOk}/${totalImages} imágenes cargadas correctamente`);
+                    } else {
+                        addTestResult('Carga de Imágenes', false, `${imagesOk}/${totalImages} imágenes disponibles`);
+                    }
+                    
+                } else {
+                    throw new Error('propiedades.json no disponible');
+                }
+                
+                addTestResult('Carga de Archivos', true, 'Todos los archivos JS cargados correctamente');
+                addTestResult('Datos JSON', true, 'propiedades.json disponible y válido');
+                
+                console.log('🎉 Tests completados exitosamente!');
+                
+            } catch (error) {
+                console.error('❌ Error durante los tests:', error);
+                addTestResult('Sistema General', false, error.message);
+            }
+        }
+        
+        // Ejecutar tests cuando la página cargue
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>
