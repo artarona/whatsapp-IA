@@ -154,6 +154,55 @@
             color: #28a745;
         }
 
+        .interest-confirmation {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .interest-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .interest-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .interest-btn.interested {
+            background: #28a745;
+            color: white;
+        }
+
+        .interest-btn.not-interested {
+            background: #6c757d;
+            color: white;
+        }
+
+        .interest-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+
+        .download-info {
+            background: #cce7ff;
+            color: #004085;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+
         @media (max-width: 600px) {
             .container {
                 margin: 0;
@@ -226,9 +275,13 @@
 1️⃣ Buscar propiedad
 2️⃣ Ver todas las propiedades  
 3️⃣ Ayuda
-4️⃣ Salir
+4️⃣ Estadísticas guardadas
+5️⃣ Salir
 
 💡 **Usa SOLO números para navegar**
+
+🎯 **NUEVA FUNCIONALIDAD:**
+Al buscar propiedades, te preguntaremos si estás interesado y guardaremos tu consulta en Excel.
 
 Escribe el número de tu opción:`;
 
@@ -260,6 +313,12 @@ Escribe el número de tu opción:`;
                     return processTiposMenu(input);
                 case 'barrios':
                     return processBarriosMenu(input);
+                case 'confirmacion':
+                    return processInterestMenu(input);
+                case 'contacto':
+                    return processContactoInput(input);
+                case 'detalles':
+                    return processInterestMenu(input);
                 default:
                     showMessage("❌ Error en el menú. Vuelve al menú principal.", false);
                     showWelcome();
@@ -282,18 +341,28 @@ Escribe el número:`, false);
                     
                 case '2':
                     mostrarTodasPropiedades();
-                    return 'principal';
+                    return 'confirmacion';
                     
                 case '3':
                     mostrarAyuda();
                     return 'principal';
                     
                 case '4':
+                    mostrarEstadisticasGuardadas();
+                    return 'principal';
+                    
+                case '5':
                 case '0':
                     showMessage("👋 ¡Gracias por usar Dante Propiedades!\n\n💬 Escribe 'Hola' para empezar de nuevo.", false);
                     return 'principal';
                     
                 default:
+                    // Comando especial para limpiar datos
+                    if (input.toLowerCase() === 'limpiar') {
+                        limpiarConsultas();
+                        return 'principal';
+                    }
+                    
                     showMessage(`❌ Opción no válida: "${input}"
 
 **MENÚ PRINCIPAL:**
@@ -301,7 +370,8 @@ Escribe el número:`, false);
 1️⃣ Buscar propiedad
 2️⃣ Ver todas las propiedades  
 3️⃣ Ayuda
-4️⃣ Salir
+4️⃣ Estadísticas
+5️⃣ Salir
 
 Escribe el número:`, false);
                     return 'principal';
@@ -320,7 +390,7 @@ Escribe el número:`, false);
                     
                 case '3':
                     mostrarTodasPropiedades();
-                    return 'busqueda';
+                    return 'confirmacion';
                     
                 case '4':
                 case '0':
@@ -421,9 +491,10 @@ Escribe el número:`, false);
                 content += `   📍 ${prop.barrio} • ${precio}\n`;
                 content += `   🏠 ${prop.tipo} • ${prop.ambientes || 0} amb.\n\n`;
             });
-            content += `\n**Vuelve al menú principal escribiendo el número de tu opción:**\n1️⃣ Buscar otra vez\n2️⃣ Salir`;
+            content += `\n**¿Te interesa alguna propiedad?**\n1️⃣ Sí, estoy interesado\n2️⃣ No, gracias\n3️⃣ Buscar por filtros específicos`;
 
             showMessage(content, false);
+            mostrarConfirmacionInteres(propiedades, `✅ Aquí tienes todas nuestras ${propiedades.length} propiedades disponibles`);
         }
 
         function filtrarPorTipo(tipo) {
@@ -444,6 +515,7 @@ Escribe el número:`, false);
             });
 
             showMessage(content, false);
+            mostrarConfirmacionInteres(filtradas, `✅ Encontré ${filtradas.length} propiedades de tipo "${tipo.toUpperCase()}"`);
         }
 
         function filtrarPorBarrio(barrio) {
@@ -464,24 +536,34 @@ Escribe el número:`, false);
             });
 
             showMessage(content, false);
+            mostrarConfirmacionInteres(filtradas, `✅ Encontré ${filtradas.length} propiedades en "${barrio.toUpperCase()}"`);
         }
 
         function mostrarAyuda() {
-            const content = `❓ **AYUDA**
+            const content = `❓ **AYUDA - CHATBOT DANTE**
 
-🔢 **NAVEGACIÓN:**
-• Usa SOLO números para navegar
+🔢 **NAVEGACIÓN NUMÉRICA:**
+• Usa SOLO números para navegar (1, 2, 3, 4)
 • Los menús se generan automáticamente
 • '0' vuelve al menú anterior
 
-🎯 **EJEMPLOS:**
-• "1" → Buscar propiedad
-• "2" → Ver todas las propiedades
-• "3" → Ayuda
+🎯 **FLUJO DE BÚSQUEDA:**
+1. Buscar propiedad → Filtros → Resultados
+2. Al final te preguntamos si estás interesado
+3. Si sí, guardamos tu consulta en Excel
+
+📊 **CONFIRMACIÓN DE INTERÉS:**
+• Después de cada búsqueda te preguntamos
+• Si estás interesado, proporcionas tus datos
+• Generamos archivo Excel con tu consulta
 
 💡 **COMANDOS:**
-• "Hola" → Reiniciar
-• "Menu" → Menú principal`;
+• "Hola" → Reiniciar conversación
+• "Menu" → Volver al menú principal
+
+🏠 **DATOS DISPONIBLES:**
+• ${propiedades.length} propiedades reales
+• Precios, barrios, tipos actualizados`;
 
             showMessage(content, false);
         }
@@ -499,11 +581,19 @@ Escribe el número:`, false);
             // Comandos especiales
             if (message.toLowerCase() === 'hola' || message.toLowerCase() === 'menu') {
                 currentMenu = 'principal';
+                propiedadesInteres = [];
+                ultimaBusqueda = [];
                 showWelcome();
                 return;
             }
             
-            // Procesar mensaje
+            // En modo contacto, procesar como información de contacto
+            if (currentMenu === 'contacto') {
+                currentMenu = processContactoInput(message);
+                return;
+            }
+            
+            // Procesar mensaje según el menú actual
             currentMenu = processMenu(currentMenu, message);
         }
 
@@ -513,6 +603,243 @@ Escribe el número:`, false);
                 sendMessage();
             }
         });
+
+        // Sistema de seguimiento de interés
+        let propiedadesInteres = [];
+        let ultimaBusqueda = [];
+
+        function mostrarConfirmacionInteres(filtradas, tituloBusqueda) {
+            ultimaBusqueda = filtradas;
+            
+            const content = `${tituloBusqueda}
+
+✅ **¿Te interesa alguna de estas propiedades?**
+
+**OPCIONES:**
+1️⃣ Sí, estoy interesado
+2️⃣ No, gracias
+3️⃣ Ver más detalles
+
+*Tu respuesta nos ayuda a ofrecerte mejores opciones.*`;
+
+            showMessage(content, false);
+        }
+
+        function processInterestMenu(input) {
+            switch(input) {
+                case '1':
+                    solicitarInformacionContacto();
+                    return 'contacto';
+                    
+                case '2':
+                    showMessage("👍 No hay problema.\n\n💡 **¿Hay algo más en lo que pueda ayudarte?**\n1️⃣ Buscar otra propiedad\n2️⃣ Ver todas las propiedades\n3️⃣ Menú principal", false);
+                    return 'principal';
+                    
+                case '3':
+                    mostrarDetallesPropiedades();
+                    return 'detalles';
+                    
+                default:
+                    mostrarConfirmacionInteres(ultimaBusqueda, '⚠️ Opción no válida.');
+                    return 'confirmacion';
+            }
+        }
+
+        function solicitarInformacionContacto() {
+            const content = `📞 **EXCELENTE DECISIÓN**
+
+Para poder contactarte con información detallada, necesito tus datos:
+
+**📱 INFORMACIÓN REQUERIDA:**
+• Nombre completo
+• Teléfono/WhatsApp  
+• Email (opcional)
+
+*Ejemplo:*
+- Juan Pérez
+- +54 9 11 1234-5678
+- juan@email.com
+
+**Escribe tus datos:**`;
+
+            showMessage(content, false);
+        }
+
+        function processContactoInput(input) {
+            // Procesar información de contacto y guardar
+            const datos = input.split('\n').map(d => d.trim()).filter(d => d);
+            
+            if (datos.length >= 2) {
+                guardarInteresEnExcel(datos[0], datos[1], datos[2] || '');
+                
+                const content = `✅ **¡DATOS GUARDADOS EXITOSAMENTE!**
+
+📋 **Resumen:**
+• Nombre: ${datos[0]}
+• Teléfono: ${datos[1]}
+• Email: ${datos[2] || 'No proporcionado'}
+
+📊 **Propiedades de interés:** ${ultimaBusqueda.length}
+
+🏆 **Próximos pasos:**
+• Te contactaremos en las próximas 24hs
+• Recibirás información detallada
+• Podrás agendar visitas
+
+*¡Gracias por tu interés!* 🎉`;
+
+                showMessage(content, false);
+                
+                // Reiniciar datos
+                propiedadesInteres = [];
+                ultimaBusqueda = [];
+                
+                setTimeout(() => {
+                    showMessage(`💡 **¿Necesitas algo más?**
+1️⃣ Buscar otra propiedad
+2️⃣ Ver todas las propiedades  
+3️⃣ Menú principal`, false);
+                }, 3000);
+                
+                return 'principal';
+            } else {
+                showMessage(`⚠️ **Información incompleta**
+
+Por favor proporciona al menos:
+• Nombre completo
+• Teléfono/WhatsApp
+
+*Ejemplo:*
+Juan Pérez
++54 9 11 1234-5678
+
+**Escribe nuevamente tus datos:**`, false);
+                return 'contacto';
+            }
+        }
+
+        function mostrarDetallesPropiedades() {
+            if (ultimaBusqueda.length === 0) {
+                showMessage("❌ No hay propiedades para mostrar.", false);
+                return 'confirmacion';
+            }
+
+            let content = `🏠 **DETALLES DE PROPIEDADES (${ultimaBusqueda.length}):**\n\n`;
+            ultimaBusqueda.forEach((prop, index) => {
+                const precio = prop.precio ? 
+                    `$${prop.precio.toLocaleString()} ${prop.moneda_precio || 'USD'}` : 
+                    'Consultar precio';
+                content += `**${index + 1}.** ${prop.titulo}\n`;
+                content += `   📍 ${prop.barrio}\n`;
+                content += `   💰 ${precio}\n`;
+                content += `   🏠 ${prop.tipo} • ${prop.ambientes || 0} amb.\n`;
+                content += `   🏢 ${prop.direccion || 'Dirección no disponible'}\n\n`;
+            });
+
+            content += `\n**¿Te interesa alguna?**
+1️⃣ Sí, estoy interesado
+2️⃣ No, gracias`;
+
+            showMessage(content, false);
+            return 'confirmacion';
+        }
+
+        function guardarInteresEnExcel(nombre, telefono, email) {
+            try {
+                // Preparar datos para Excel
+                const fecha = new Date().toLocaleString('es-AR');
+                const datosExcel = ultimaBusqueda.map(prop => ({
+                    'Fecha Consulta': fecha,
+                    'Nombre': nombre,
+                    'Teléfono': telefono,
+                    'Email': email,
+                    'ID Propiedad': prop.id_temporal,
+                    'Título': prop.titulo,
+                    'Barrio': prop.barrio,
+                    'Tipo': prop.tipo,
+                    'Precio': prop.precio || 'Consultar',
+                    'Moneda': prop.moneda_precio || 'USD',
+                    'Ambientes': prop.ambientes || 0,
+                    'Metros²': prop.metros_cuadrados || 0,
+                    'Operación': prop.operacion || '',
+                    'Descripción': prop.descripcion || ''
+                }));
+
+                // Crear contenido CSV (más simple que Excel pero compatible)
+                const csvContent = [
+                    // Headers
+                    Object.keys(datosExcel[0]).join(','),
+                    // Datos
+                    ...datosExcel.map(row => 
+                        Object.values(row).map(val => 
+                            typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : val
+                        ).join(',')
+                    )
+                ].join('\n');
+
+                // Crear y descargar archivo
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                const nombreArchivo = `consultas_dante_${nombre.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', nombreArchivo);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // También guardar en localStorage para referencia
+                const registros = JSON.parse(localStorage.getItem('consultasDante') || '[]');
+                registros.push({
+                    fecha,
+                    nombre,
+                    telefono,
+                    email,
+                    propiedades: ultimaBusqueda.length
+                });
+                localStorage.setItem('consultasDante', JSON.stringify(registros));
+
+                console.log('✅ Datos guardados exitosamente');
+                
+            } catch (error) {
+                console.error('❌ Error guardando datos:', error);
+                showMessage("⚠️ Error guardando datos, pero tu consulta fue registrada.", false);
+            }
+        }
+
+        function mostrarEstadisticasGuardadas() {
+            try {
+                const registros = JSON.parse(localStorage.getItem('consultasDante') || '[]');
+                const content = `📊 **ESTADÍSTICAS DE CONSULTAS**
+
+📈 **Total de consultas guardadas:** ${registros.length}
+
+💼 **Últimas consultas:**
+${registros.slice(-5).map(r => 
+    `• ${r.fecha} - ${r.nombre} (${r.propiedades} propiedades)`
+).join('\n') || 'No hay consultas registradas'}
+
+💾 **Los datos se guardan en:**
+• Archivo CSV descargable
+• LocalStorage del navegador
+
+🔄 Para limpiar datos: escribe "limpiar"`;
+
+                showMessage(content, false);
+            } catch (error) {
+                showMessage("❌ Error obteniendo estadísticas.", false);
+            }
+        }
+
+        function limpiarConsultas() {
+            localStorage.removeItem('consultasDante');
+            showMessage("✅ Datos de consultas limpiados correctamente.", false);
+        }
+        }
 
         // Inicializar
         window.onload = function() {
