@@ -848,27 +848,40 @@ Visitá: ${BACKEND_URL}/api/exportar-excel
             try {
                 // Obtener estadísticas del servidor
                 console.log('📊 Obteniendo estadísticas del servidor...');
-                const response = await fetch(`${BACKEND_URL}/api/estadisticas`);
+                console.log('🌐 URL:', `${BACKEND_URL}/api/estadisticas`);
+                
+                const response = await fetch(`${BACKEND_URL}/api/estadisticas`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                console.log('📡 Respuesta del servidor:', response.status, response.ok);
                 
                 let estadisticasServidor = '';
                 if (response.ok) {
                     const stats = await response.json();
+                    console.log('📊 Datos recibidos:', stats);
                     estadisticasServidor = `
 📈 **Total en servidor:** ${stats.total_consultas} consultas
 
 🏠 **Tipos de propiedades más solicitadas:**
-${Object.entries(stats.tipos_propiedades_interes)
+${Object.entries(stats.tipos_propiedades_interes || {})
     .sort((a,b) => b[1] - a[1])
     .slice(0, 3)
     .map(([tipo, cantidad]) => `• ${tipo}: ${cantidad}`)
     .join('\n') || 'No hay datos'}
 
 🏘️ **Barrios más solicitados:**
-${Object.entries(stats.barrios_interes)
+${Object.entries(stats.barrios_interes || {})
     .sort((a,b) => b[1] - a[1])
     .slice(0, 3)
     .map(([barrio, cantidad]) => `• ${barrio}: ${cantidad}`)
     .join('\n') || 'No hay datos'}`;
+                } else {
+                    console.log('❌ Error del servidor:', response.status, response.statusText);
+                    estadisticasServidor = '❌ **Error del servidor:** ' + response.status + ' - ' + response.statusText;
                 }
 
                 const registros = JSON.parse(localStorage.getItem('consultasDante') || '[]');
@@ -896,7 +909,22 @@ Solo necesitás la URL para descargar el Excel completo
                 showMessage(content, false);
             } catch (error) {
                 console.error('❌ Error obteniendo estadísticas:', error);
-                showMessage("⚠️ Error conectando al servidor. Solo datos locales disponibles.", false);
+                
+                // Mostrar información de depuración
+                const errorInfo = `⚠️ **Error de conectividad**
+
+🌐 **URL del servidor:** ${BACKEND_URL}/api/estadisticas
+❌ **Error:** ${error.message}
+
+🔧 **Soluciones:**
+1. Verificar que el servidor backend esté corriendo
+2. Abrir nueva pestaña en: ${BACKEND_URL}/api/estadisticas
+3. Verificar que ambos servidores estén activos
+
+💾 **Datos locales disponibles**
+Escribe "limpiar" para resetear datos locales.`;
+
+                showMessage(errorInfo, false);
             }
         }
 
