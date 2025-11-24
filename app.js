@@ -1,1485 +1,338 @@
-// ===== APLICACIÓN PRINCIPAL =====
-
-class App {
-    constructor() {
-        this.isInitialized = false;
-        this.components = {};
-        this.eventListeners = [];
-        
-        this.init();
-    }
-
-    // Inicializar la aplicación
-    async init() {
-        ConfigUtils.info('Inicializando aplicación...');
-        
-        try {
-            // Esperar a que el DOM esté listo
-            if (document.readyState === 'loading') {
-                await new Promise(resolve => {
-                    document.addEventListener('DOMContentLoaded', resolve);
-                });
-            }
-            
-            // Inicializar componentes en orden
-            await this.initializeComponents();
-            
-            // Configurar eventos globales
-            this.setupGlobalEvents();
-            
-            // Configurar interfaz
-            this.setupUI();
-            
-            this.isInitialized = true;
-            ConfigUtils.info('Aplicación inicializada correctamente');
-            
-            // Mostrar estado inicial
-            this.showInitialState();
-            
-        } catch (error) {
-            ConfigUtils.error('Error inicializando aplicación:', error);
-            this.showErrorState(error);
-        }
-    }
-
-    // Inicializar componentes
-    async initializeComponents() {
-        ConfigUtils.info('Inicializando componentes...');
-        
-        const initSteps = [
-            { name: 'PropertyManager', component: () => this.waitForComponent('PropertyManager') },
-            { name: 'Chatbot', component: () => this.waitForComponent('Chatbot') },
-            { name: 'MenuSystem', component: () => this.waitForComponent('MenuSystem') },
-            { name: 'UI', component: () => this.setupAdvancedUI() }
-        ];
-        
-        for (const step of initSteps) {
-            try {
-                ConfigUtils.debug(`Inicializando ${step.name}...`);
-                await step.component();
-                this.components[step.name] = true;
-                ConfigUtils.info(`${step.name} inicializado`);
-            } catch (error) {
-                ConfigUtils.error(`Error inicializando ${step.name}:`, error);
-                throw error;
-            }
-        }
-    }
-
-    // Esperar a que un componente esté disponible
-    async waitForComponent(componentName) {
-        let attempts = 0;
-        const maxAttempts = 100;
-        
-        while (!window[componentName] && attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            attempts++;
-        }
-        
-        if (!window[componentName]) {
-            throw new Error(`Componente ${componentName} no disponible después de ${maxAttempts} intentos`);
-        }
-        
-        // Para PropertyManager, esperar a que termine de cargar
-        if (componentName === 'PropertyManager') {
-            while (window.PropertyManager.getLoadingState()) {
-                await new Promise(resolve => setTimeout(resolve, 200));
-            }
-        }
-    }
-
-    // Configurar eventos globales
-    setupGlobalEvents() {
-        ConfigUtils.debug('Configurando eventos globales...');
-        
-        // Evento de resultados de búsqueda
-        window.addEventListener('displaySearchResults', (event) => {
-            this.displaySearchResults(event.detail.properties);
-        });
-        
-        // Evento de propiedades cargadas
-        window.addEventListener('propertiesLoaded', (event) => {
-            this.onPropertiesLoaded(event.detail);
-        });
-        
-        // Evento de redimensionamiento
-        window.addEventListener('resize', Utils.Performance.throttle(() => {
-            this.handleResize();
-        }, 250));
-        
-        // Evento de scroll
-        window.addEventListener('scroll', Utils.Performance.throttle(() => {
-            this.handleScroll();
-        }, 100));
-        
-        // Manejo de errores globales
-        window.addEventListener('error', (event) => {
-            ConfigUtils.error('Error global:', event.error);
-            this.handleGlobalError(event.error);
-        });
-        
-        // Manejo de promesas rechazadas
-        window.addEventListener('unhandledrejection', (event) => {
-            ConfigUtils.error('Promesa rechazada:', event.reason);
-            this.handleUnhandledRejection(event.reason);
-        });
-    }
-
-    // Configurar interfaz avanzada
-    setupAdvancedUI() {
-        // Configurar tooltips
-        this.setupTooltips();
-        
-        // Configurar lazy loading de imágenes
-        this.setupLazyLoading();
-        
-        // Configurar animaciones de scroll
-        this.setupScrollAnimations();
-        
-        // Configurar filtros avanzados
-        this.setupAdvancedFilters();
-        
-        // Configurar modal de fotos
-        this.setupPhotoModal();
-        
-        // Configurar botones de acción
-        this.setupActionButtons();
-    }
-
-    // Configurar tooltips
-    setupTooltips() {
-        const tooltipElements = Utils.DOM.$$('[data-tooltip]');
-        
-        tooltipElements.forEach(element => {
-            element.addEventListener('mouseenter', (e) => {
-                this.showTooltip(e.target, e.target.dataset.tooltip);
-            });
-            
-            element.addEventListener('mouseleave', () => {
-                this.hideTooltip();
-            });
-        });
-    }
-
-    // Mostrar tooltip
-    showTooltip(element, text) {
-        const tooltip = Utils.DOM.createElement('div', {
-            className: 'tooltip',
-            id: 'tooltip'
-        }, text);
-        
-        document.body.appendChild(tooltip);
-        
-        const rect = element.getBoundingClientRect();
-        const tooltipRect = tooltip.getBoundingClientRect();
-        
-        tooltip.style.left = (rect.left + (rect.width / 2) - (tooltipRect.width / 2)) + 'px';
-        tooltip.style.top = (rect.top - tooltipRect.height - 10) + 'px';
-        
-        // Animación
-        Utils.Animation.fadeIn(tooltip, 200);
-    }
-
-    // Ocultar tooltip
-    hideTooltip() {
-        const tooltip = Utils.DOM.$('#tooltip');
-        if (tooltip) {
-            Utils.Animation.fadeOut(tooltip, 200, () => {
-                tooltip.remove();
-            });
-        }
-    }
-
-    // Configurar lazy loading
-    setupLazyLoading() {
-        const images = Utils.DOM.$$('img[data-src]');
-        
-        const imageObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.add('loaded');
-                    imageObserver.unobserve(img);
-                }
-            });
-        });
-        
-        images.forEach(img => imageObserver.observe(img));
-    }
-
-    // Configurar animaciones de scroll
-    setupScrollAnimations() {
-        const animatedElements = Utils.DOM.$$('[data-animate]');
-        
-        const animationObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const element = entry.target;
-                    const animationType = element.dataset.animate;
-                    element.classList.add(`animate-${animationType}`);
-                    animationObserver.unobserve(element);
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        });
-        
-        animatedElements.forEach(element => animationObserver.observe(element));
-    }
-
-    // Configurar filtros avanzados
-    setupAdvancedFilters() {
-        const searchBtn = Utils.DOM.$('#searchBtn');
-        const resetBtn = Utils.DOM.$('#resetBtn');
-        const showAllBtn = Utils.DOM.$('#showAllBtn');
-        
-        if (searchBtn) {
-            searchBtn.addEventListener('click', () => this.performAdvancedSearch());
-        }
-        
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => this.resetFilters());
-        }
-        
-        if (showAllBtn) {
-            showAllBtn.addEventListener('click', () => this.showAllProperties());
-        }
-        
-        // Event listeners para filtros
-        this.setupFilterEventListeners();
-    }
-
-    // Configurar event listeners de filtros
-    setupFilterEventListeners() {
-        const filterElements = [
-            '#barrio-select',
-            '#tipo-select', 
-            '#operacion-select',
-            '#precio-min',
-            '#precio-max',
-            '#ambientes-min'
-        ];
-        
-        filterElements.forEach(selector => {
-            const element = Utils.DOM.$(selector);
-            if (element) {
-                element.addEventListener('change', () => {
-                    this.updateFilterVisualFeedback();
-                });
-                
-                if (element.type === 'number') {
-                    element.addEventListener('input', () => {
-                        this.updateFilterVisualFeedback();
-                    });
-                }
-            }
-        });
-    }
-
-    // Actualizar feedback visual de filtros
-    updateFilterVisualFeedback() {
-        const filterElements = [
-            '#barrio-select',
-            '#tipo-select',
-            '#operacion-select',
-            '#precio-min',
-            '#precio-max',
-            '#ambientes-min'
-        ];
-        
-        filterElements.forEach(selector => {
-            const element = Utils.DOM.$(selector);
-            if (element) {
-                const hasValue = element.value && element.value.trim() !== '';
-                
-                if (hasValue) {
-                    Utils.DOM.addClass(element, 'filter-active');
-                } else {
-                    Utils.DOM.removeClass(element, 'filter-active');
-                }
-            }
-        });
-    }
-
-    // Configurar modal de fotos
-    setupPhotoModal() {
-        // Los event listeners se configuran dinámicamente cuando se muestran las propiedades
-        document.addEventListener('click', (event) => {
-            if (event.target.classList.contains('property-image') || 
-                event.target.closest('.property-image')) {
-                
-                const propertyCard = event.target.closest('.property-card');
-                if (propertyCard) {
-                    const propertyId = propertyCard.dataset.propertyId;
-                    if (propertyId) {
-                        this.showPropertyPhotos(propertyId);
-                    }
-                }
-            }
-        });
-    }
-
-    // Configurar botones de acción
-    setupActionButtons() {
-        // Los botones se configuran dinámicamente en las tarjetas de propiedades
-    }
-
-    // Configurar interfaz básica
-    setupUI() {
-        // Configurar header fijo
-        this.setupFixedHeader();
-        
-        // Configurar smooth scroll
-        this.setupSmoothScroll();
-        
-        // Configurar botones de acción rápida
-        this.setupQuickActions();
-        
-        // Configurar búsqueda instantánea
-        this.setupInstantSearch();
-    }
-
-    // Configurar header fijo
-    setupFixedHeader() {
-        const header = Utils.DOM.$('.header');
-        if (!header) return;
-        
-        let lastScrollTop = 0;
-        
-        window.addEventListener('scroll', Utils.Performance.throttle(() => {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scrolling down
-                header.style.transform = 'translateY(-100%)';
-            } else {
-                // Scrolling up
-                header.style.transform = 'translateY(0)';
-            }
-            
-            lastScrollTop = scrollTop;
-        }, 100));
-    }
-
-    // Configurar smooth scroll
-    setupSmoothScroll() {
-        const links = Utils.DOM.$$('a[href^="#"]');
-        
-        links.forEach(link => {
-            link.addEventListener('click', (event) => {
-                event.preventDefault();
-                
-                const targetId = link.getAttribute('href').substring(1);
-                const target = Utils.DOM.$('#' + targetId);
-                
-                if (target) {
-                    Utils.DOM.scrollToElement(target, 100, 500);
-                }
-            });
-        });
-    }
-
-    // Configurar acciones rápidas
-    setupQuickActions() {
-        const quickActions = [
-            { selector: '#showFavoritesBtn', action: 'showFavorites' },
-            { selector: '#compareBtn', action: 'compareProperties' },
-            { selector: '#exportBtn', action: 'exportResults' },
-            { selector: '#shareBtn', action: 'shareResults' }
-        ];
-        
-        quickActions.forEach(({ selector, action }) => {
-            const button = Utils.DOM.$(selector);
-            if (button) {
-                button.addEventListener('click', () => {
-                    this.handleQuickAction(action);
-                });
-            }
-        });
-    }
-
-    // Configurar búsqueda instantánea
-    setupInstantSearch() {
-        const searchInput = Utils.DOM.$('#instantSearchInput');
-        if (!searchInput) return;
-        
-        const debouncedSearch = Utils.Performance.debounce((query) => {
-            if (query.length >= 3) {
-                this.performInstantSearch(query);
-            } else if (query.length === 0) {
-                this.clearInstantSearch();
-            }
-        }, 300);
-        
-        searchInput.addEventListener('input', (event) => {
-            debouncedSearch(event.target.value.trim());
-        });
-    }
-
-    // Mostrar estado inicial
-    showInitialState() {
-        // Las propiedades se cargan automáticamente
-        this.updateSearchStats(0);
-        
-        // Mostrar mensaje de bienvenida en la sección de propiedades
-        this.showNoResultsState();
-    }
-
-    // Mostrar estado de error
-    showErrorState(error) {
-        const resultsContainer = Utils.DOM.$('#propertyResults');
-        if (resultsContainer) {
-            resultsContainer.innerHTML = `
-                <div class="error-state">
-                    <div class="error-icon">⚠️</div>
-                    <h3>Error cargando la aplicación</h3>
-                    <p>${error.message || 'Ha ocurrido un error inesperado'}</p>
-                    <button class="btn btn-primary" onclick="location.reload()">
-                        🔄 Recargar Página
-                    </button>
-                </div>
-            `;
-        }
-    }
-
-    // Manejar cuando se cargan las propiedades
-    onPropertiesLoaded(data) {
-        ConfigUtils.info('Propiedades cargadas, actualizando interfaz...');
-        
-        // Actualizar filtros dinámicamente
-        this.updateDynamicFilters(data.filters);
-        
-        // Mostrar mensaje de bienvenida actualizado
-        this.updateWelcomeMessage(data);
-        
-        // Configurar callbacks del sistema de menús
-        this.setupMenuCallbacks();
-    }
-
-    // Actualizar filtros dinámicamente
-    updateDynamicFilters(filters) {
-        // Actualizar selector de barrios
-        const barrioSelect = Utils.DOM.$('#barrio-select');
-        if (barrioSelect && filters.barrios) {
-            this.populateSelectOptions(barrioSelect, filters.barrios, 'Todos los barrios');
-        }
-        
-        // Actualizar selector de tipos
-        const tipoSelect = Utils.DOM.$('#tipo-select');
-        if (tipoSelect && filters.tipos) {
-            this.populateSelectOptions(tipoSelect, filters.tipos, 'Todos los tipos');
-        }
-    }
-
-    // Poblar opciones de select
-    populateSelectOptions(selectElement, options, defaultText) {
-        // Limpiar opciones existentes excepto la primera
-        while (selectElement.children.length > 1) {
-            selectElement.removeChild(selectElement.lastChild);
-        }
-        
-        // Agregar nuevas opciones
-        options.forEach(option => {
-            const optionElement = document.createElement('option');
-            optionElement.value = option;
-            optionElement.textContent = option;
-            selectElement.appendChild(optionElement);
-        });
-    }
-
-    // Actualizar mensaje de bienvenida
-    updateWelcomeMessage(data) {
-        const total = data.properties.length;
-        const tipos = data.filters.tipos.length;
-        const barrios = data.filters.barrios.length;
-        
-        ConfigUtils.info(`Sistema listo: ${total} propiedades, ${tipos} tipos, ${barrios} barrios`);
-    }
-
-    // Configurar callbacks del sistema de menús
-    setupMenuCallbacks() {
-        if (window.MenuSystem) {
-            window.MenuSystem.onAction((actionType, data) => {
-                this.handleMenuAction(actionType, data);
-            });
-        }
-    }
-
-    // Manejar acciones del menú
-    handleMenuAction(actionType, data) {
-        switch (actionType) {
-            case 'SEARCH_RESULTS':
-                this.displaySearchResults(data.results);
-                break;
-            case 'STATISTICS':
-                this.displayStatistics(data.statsType);
-                break;
-            case 'CONTACT_INFO':
-                this.showContactModal();
-                break;
-        }
-    }
-
-    // Mostrar/actualizar resultados de búsqueda
-    displaySearchResults(properties) {
-        const resultsContainer = Utils.DOM.$('#propertyResults');
-        const statsElement = Utils.DOM.$('#searchStats');
-        const countElement = Utils.DOM.$('#resultsCount');
-        
-        if (properties.length === 0) {
-            this.showNoResultsState();
-            return;
-        }
-        
-        // Actualizar estadísticas
-        if (statsElement && countElement) {
-            statsElement.style.display = 'block';
-            countElement.textContent = properties.length;
-        }
-        
-        // Generar HTML de resultados
-        const html = this.generatePropertyCardsHTML(properties.slice(0, AppConfig.search.resultsPerPage));
-        
-        if (resultsContainer) {
-            resultsContainer.innerHTML = html;
-            
-            // Animar entrada
-            Utils.Animation.fadeIn(resultsContainer, 300);
-        }
-        
-        // Scroll a resultados
-        Utils.DOM.scrollToElement(resultsContainer, 50, 500);
-        
-        // Configurar eventos de las tarjetas
-        this.setupPropertyCardEvents();
-        
-        // Mostrar botón de "ver más" si es necesario
-        if (properties.length > AppConfig.search.resultsPerPage) {
-            this.showLoadMoreButton(properties);
-        }
-    }
-
-    // Generar HTML de tarjetas de propiedades
-    generatePropertyCardsHTML(properties) {
-        return properties.map(property => this.generatePropertyCardHTML(property)).join('');
-    }
-
-    // Generar HTML de una tarjeta de propiedad
-    generatePropertyCardHTML(property) {
-        const mainImage = PropertyManager.getPropertyMainImage(property);
-        const images = PropertyManager.getPropertyImages(property);
-        
-        let amenitiesHTML = '';
-        Object.entries(AppConfig.properties.amenities).forEach(([key, config]) => {
-            if (property[key] === 'Si' || property[key] === 'x') {
-                amenitiesHTML += `<span class="amenity">${config.icon} ${config.label}</span>`;
-            }
-        });
-        
-        return `
-            <div class="property-card fade-in" data-property-id="${property.id_temporal}">
-                <div class="property-image">
-                    <img src="${mainImage}" alt="${property.titulo}" loading="lazy" 
-                         onerror="this.src='${AppConfig.properties.defaultImage}'">
-                    <div class="property-badge ${property.operacion}">
-                        ${Utils.String.titleCase(property.operacion)}
-                    </div>
-                </div>
-                
-                <div class="property-content">
-                    <h3 class="property-title">${property.titulo}</h3>
-                    
-                    <div class="property-location">
-                        📍 ${property.barrio}
-                    </div>
-                    
-                    <div class="property-price">
-                        ${Utils.Number.formatCurrency(property.precio, property.moneda_precio)}
-                        <span class="property-price-currency">${property.moneda_precio}</span>
-                    </div>
-                    
-                    ${property.expensas > 0 ? `
-                        <div class="property-expenses">
-                            Expensas: ${Utils.Number.formatCurrency(property.expensas, property.moneda_expensas)}
-                        </div>
-                    ` : ''}
-                    
-                    <div class="property-details">
-                        <div class="property-detail">
-                            <span class="property-detail-icon">🛏️</span>
-                            <span>${property.ambientes} ambientes</span>
-                        </div>
-                        <div class="property-detail">
-                            <span class="property-detail-icon">📐</span>
-                            <span>${property.metros_cuadrados} m²</span>
-                        </div>
-                        <div class="property-detail">
-                            <span class="property-detail-icon">🏢</span>
-                            <span>${Utils.String.titleCase(property.tipo)}</span>
-                        </div>
-                        <div class="property-detail">
-                            <span class="property-detail-icon">🗺️</span>
-                            <span>${property.direccion || property.barrio}</span>
-                        </div>
-                    </div>
-                    
-                    ${amenitiesHTML ? `
-                        <div class="property-amenities">
-                            ${amenitiesHTML}
-                        </div>
-                    ` : ''}
-                    
-                    ${property.descripcion ? `
-                        <div class="property-description">
-                            ${Utils.String.truncate(property.descripcion, 120)}
-                        </div>
-                    ` : ''}
-                    
-                    <div class="property-actions">
-                        <button class="property-btn primary" onclick="app.showPropertyPhotos('${property.id_temporal}')">
-                            📸 Ver Fotos (${images.length})
-                        </button>
-                        <button class="property-btn secondary" onclick="app.contactProperty('${property.id_temporal}')">
-                            💬 Contactar
-                        </button>
-                        <button class="property-btn success" onclick="app.saveToFavorites('${property.id_temporal}')">
-                            ❤️ Guardar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // Configurar eventos de tarjetas de propiedades
-    setupPropertyCardEvents() {
-        // Los eventos se configuran automáticamente por los onclick en el HTML
-    }
-
-    // Mostrar estado "sin resultados"
-    showNoResultsState() {
-        const resultsContainer = Utils.DOM.$('#propertyResults');
-        const statsElement = Utils.DOM.$('#searchStats');
-        
-        if (statsElement) {
-            statsElement.style.display = 'none';
-        }
-        
-        if (resultsContainer) {
-            resultsContainer.innerHTML = `
-                <div class="no-results fade-in">
-                    <div class="no-results-icon">🔍</div>
-                    <h3>Escribe tu consulta para ver propiedades</h3>
-                    <p>Usa el chatbot de arriba o los filtros de búsqueda avanzada</p>
-                    
-                    <div class="suggestions">
-                        <h4>💡 Sugerencias:</h4>
-                        <ul>
-                            <li>Escribe "departamentos en Palermo"</li>
-                            <li>Prueba "casa con pileta hasta 200k"</li>
-                            <li>Busca "monoambiente alquiler"</li>
-                            <li>Explora por barrio o tipo de propiedad</li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-        }
-    }
-
-    // Mostrar botón "cargar más"
-    showLoadMoreButton(properties) {
-        const resultsContainer = Utils.DOM.$('#propertyResults');
-        if (!resultsContainer) return;
-        
-        const loadMoreHTML = `
-            <div class="show-more-container fade-in">
-                <p class="show-more-stats">
-                    Mostrando ${AppConfig.search.resultsPerPage} de ${properties.length} propiedades
-                </p>
-                <button class="btn btn-primary btn-lg" onclick="app.loadMoreProperties(${JSON.stringify(properties).replace(/"/g, '&quot;')})">
-                    📋 Ver Todas las Propiedades (${properties.length})
-                </button>
-            </div>
-        `;
-        
-        resultsContainer.insertAdjacentHTML('beforeend', loadMoreHTML);
-    }
-
-    // Cargar más propiedades
-    loadMoreProperties(allProperties) {
-        const html = this.generatePropertyCardsHTML(allProperties);
-        const resultsContainer = Utils.DOM.$('#propertyResults');
-        
-        if (resultsContainer) {
-            // Remover el botón de "cargar más"
-            const loadMoreContainer = resultsContainer.querySelector('.show-more-container');
-            if (loadMoreContainer) {
-                loadMoreContainer.remove();
-            }
-            
-            // Reemplazar el contenido con todas las propiedades
-            resultsContainer.innerHTML = html;
-            
-            // Animar entrada
-            Utils.Animation.fadeIn(resultsContainer, 300);
-            
-            // Configurar eventos
-            this.setupPropertyCardEvents();
-        }
-    }
-
-    // Actualizar estadísticas de búsqueda
-    updateSearchStats(count) {
-        const statsElement = Utils.DOM.$('#searchStats');
-        const countElement = Utils.DOM.$('#resultsCount');
-        
-        if (statsElement && countElement) {
-            if (count > 0) {
-                statsElement.style.display = 'block';
-                countElement.textContent = count;
-            } else {
-                statsElement.style.display = 'none';
-            }
-        }
-    }
-
-    // Realizar búsqueda avanzada
-    performAdvancedSearch() {
-        const filters = this.collectFilterValues();
-        
-        ConfigUtils.debug('Realizando búsqueda avanzada:', filters);
-        
-        const results = PropertyManager.searchProperties(filters);
-        
-        // Mostrar en chatbot
-        if (window.Chatbot) {
-            const searchDescription = this.generateSearchDescription(filters);
-            window.Chatbot.displayMessage(searchDescription, 'user');
-            
-            const response = window.Chatbot.generateSearchResponse(results, 'búsqueda avanzada', filters);
-            window.Chatbot.displayMessage(response, 'bot');
-        }
-        
-        // Mostrar resultados
-        this.displaySearchResults(results);
-        
-        // Enviar evento personalizado
-        const searchEvent = new CustomEvent('advancedSearch', {
-            detail: { filters, results }
-        });
-        window.dispatchEvent(searchEvent);
-    }
-
-    // Recopilar valores de filtros
-    collectFilterValues() {
-        const filters = {
-            barrios: [],
-            tipos: [],
-            operaciones: [],
-            precio_min: null,
-            precio_max: null,
-            ambientes_min: null,
-            amenities: []
-        };
-        
-        // Barrio
-        const barrioValue = Utils.DOM.$('#barrio-select')?.value;
-        if (barrioValue && barrioValue.trim() !== '') {
-            filters.barrios = [barrioValue];
-        }
-        
-        // Tipo
-        const tipoValue = Utils.DOM.$('#tipo-select')?.value;
-        if (tipoValue && tipoValue.trim() !== '') {
-            filters.tipos = [tipoValue];
-        }
-        
-        // Operación
-        const operacionValue = Utils.DOM.$('#operacion-select')?.value;
-        if (operacionValue && operacionValue.trim() !== '') {
-            filters.operaciones = [operacionValue];
-        }
-        
-        // Precio mínimo
-        const precioMinValue = Utils.DOM.$('#precio-min')?.value;
-        if (precioMinValue && precioMinValue.trim() !== '' && !isNaN(parseInt(precioMinValue))) {
-            filters.precio_min = parseInt(precioMinValue);
-        }
-        
-        // Precio máximo
-        const precioMaxValue = Utils.DOM.$('#precio-max')?.value;
-        if (precioMaxValue && precioMaxValue.trim() !== '' && !isNaN(parseInt(precioMaxValue))) {
-            filters.precio_max = parseInt(precioMaxValue);
-        }
-        
-        // Ambientes mínimos
-        const ambientesMinValue = Utils.DOM.$('#ambientes-min')?.value;
-        if (ambientesMinValue && ambientesMinValue.trim() !== '' && !isNaN(parseInt(ambientesMinValue))) {
-            filters.ambientes_min = parseInt(ambientesMinValue);
-        }
-        
-        return filters;
-    }
-
-    // Generar descripción de búsqueda
-    generateSearchDescription(filters) {
-        let description = '🔍 Búsqueda avanzada realizada';
-        
-        if (filters.barrios.length > 0) description += ` - Barrios: ${filters.barrios.join(', ')}`;
-        if (filters.tipos.length > 0) description += ` - Tipos: ${filters.tipos.join(', ')}`;
-        if (filters.operaciones.length > 0) description += ` - Operación: ${filters.operaciones.join(', ')}`;
-        if (filters.precio_min) description += ` - Precio desde: $${filters.precio_min.toLocaleString()}`;
-        if (filters.precio_max) description += ` - Precio hasta: $${filters.precio_max.toLocaleString()}`;
-        if (filters.ambientes_min) description += ` - Mín. ${filters.ambientes_min} ambientes`;
-        
-        return description;
-    }
-
-    // Resetear filtros
-    resetFilters() {
-        const filterElements = [
-            '#barrio-select',
-            '#tipo-select',
-            '#operacion-select',
-            '#precio-min',
-            '#precio-max',
-            '#ambientes-min'
-        ];
-        
-        filterElements.forEach(selector => {
-            const element = Utils.DOM.$(selector);
-            if (element) {
-                element.value = '';
-                Utils.DOM.removeClass(element, 'filter-active');
-            }
-        });
-        
-        // Mostrar todas las propiedades
-        this.showAllProperties();
-        
-        // Notificar en el chat
-        if (window.Chatbot) {
-            window.Chatbot.displayMessage('🧹 Filtros limpiados. Puedes realizar una nueva búsqueda.', 'bot');
-        }
-    }
-
-    // Mostrar todas las propiedades
-    showAllProperties() {
-        const allProperties = PropertyManager.getAllProperties();
-        this.displaySearchResults(allProperties);
-        
-        // Notificar en el chat
-        if (window.Chatbot) {
-            window.Chatbot.displayMessage(
-                `📋 Mostrando todas las propiedades disponibles (${allProperties.length} propiedades)`,
-                'bot'
-            );
-        }
-    }
-
-    // Mostrar fotos de una propiedad
-    showPropertyPhotos(propertyId) {
-        const property = PropertyManager.getPropertyById(propertyId);
-        if (!property) return;
-        
-        const images = PropertyManager.getPropertyImages(property);
-        
-        if (images.length === 0) {
-            if (window.Chatbot) {
-                window.Chatbot.displayMessage(
-                    `📷 La propiedad "${property.titulo}" no tiene fotos disponibles`,
-                    'bot'
-                );
-            }
-            return;
-        }
-        
-        this.createPhotoModal(property, images);
-    }
-
-    // Crear modal de fotos
-    createPhotoModal(property, images) {
-        // Cerrar modal existente
-        const existingModal = Utils.DOM.$('#photoModal');
-        if (existingModal) {
-            existingModal.remove();
-        }
-        
-        const modalHTML = `
-            <div id="photoModal" class="photo-gallery active" onclick="app.closePhotoModal()">
-                <div class="gallery-content" onclick="event.stopPropagation()">
-                    <div class="gallery-header">
-                        <h3 class="gallery-title">📸 ${property.titulo}</h3>
-                        <button class="gallery-close" onclick="app.closePhotoModal()">×</button>
-                    </div>
-                    <div class="gallery-main">
-                        <img src="${images[0]}" alt="${property.titulo}" class="gallery-main-image" id="mainImage">
-                    </div>
-                    <div class="gallery-thumbnails">
-                        ${images.map((img, index) => `
-                            <img src="${img}" 
-                                 alt="Foto ${index + 1}" 
-                                 class="gallery-thumbnail ${index === 0 ? 'active' : ''}"
-                                 onclick="app.changeMainImage('${img}', this)">
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
-        // Agregar event listener para cerrar con ESC
-        document.addEventListener('keydown', this.handleEscKey);
-    }
-
-    // Cerrar modal de fotos
-    closePhotoModal() {
-        const modal = Utils.DOM.$('#photoModal');
-        if (modal) {
-            Utils.Animation.fadeOut(modal, 300, () => {
-                modal.remove();
-            });
-        }
-        
-        // Remover event listener
-        document.removeEventListener('keydown', this.handleEscKey);
-    }
-
-    // Cambiar imagen principal
-    changeMainImage(imageSrc, thumbnail) {
-        const mainImage = Utils.DOM.$('#mainImage');
-        const thumbnails = Utils.DOM.$$('.gallery-thumbnail');
-        
-        if (mainImage) {
-            mainImage.src = imageSrc;
-        }
-        
-        // Actualizar estado activo
-        thumbnails.forEach(thumb => thumb.classList.remove('active'));
-        if (thumbnail) {
-            thumbnail.classList.add('active');
-        }
-    }
-
-    // Manejar tecla ESC
-    handleEscKey(event) {
-        if (event.key === 'Escape') {
-            this.closePhotoModal();
-        }
-    }
-
-    // Contactar propiedad
-    contactProperty(propertyId) {
-        const property = PropertyManager.getPropertyById(propertyId);
-        if (!property) return;
-        
-        const message = this.generateWhatsAppMessage(property);
-        const whatsappUrl = ConfigUtils.createWhatsAppUrl(message);
-        
-        window.open(whatsappUrl, '_blank');
-        
-        // Notificar en el chat
-        if (window.Chatbot) {
-            window.Chatbot.displayMessage(
-                `💬 Abriendo WhatsApp para contactar sobre "${property.titulo}"`,
-                'bot'
-            );
-        }
-    }
-
-    // Generar mensaje de WhatsApp
-    generateWhatsAppMessage(property) {
-        return `Hola, me interesa la propiedad:
-
-🏠 ${property.titulo}
-📍 Ubicación: ${property.barrio}
-💰 Precio: ${Utils.Number.formatCurrency(property.precio, property.moneda_precio)}
-🛏️ Ambientes: ${property.ambientes}
-📐 Superficie: ${property.metros_cuadrados} m²
-
-¿Podrían proporcionarme más información?
-
-ID Propiedad: ${property.id_temporal}`;
-    }
-
-    // Guardar en favoritos
-    saveToFavorites(propertyId) {
-        const favorites = Utils.Storage.get('favorites', []);
-        
-        if (!favorites.includes(propertyId)) {
-            favorites.push(propertyId);
-            Utils.Storage.set('favorites', favorites);
-            
-            if (window.Chatbot) {
-                window.Chatbot.displayMessage(
-                    `❤️ Propiedad guardada en favoritos`,
-                    'bot'
-                );
-            }
-        } else {
-            if (window.Chatbot) {
-                window.Chatbot.displayMessage(
-                    `💡 Esta propiedad ya está en tus favoritos`,
-                    'bot'
-                );
-            }
-        }
-    }
-
-    // Manejar acciones rápidas
-    handleQuickAction(action) {
-        switch (action) {
-            case 'showFavorites':
-                this.showFavorites();
-                break;
-            case 'compareProperties':
-                this.compareProperties();
-                break;
-            case 'exportResults':
-                this.exportResults();
-                break;
-            case 'shareResults':
-                this.shareResults();
-                break;
-        }
-    }
-
-    // Mostrar favoritos
-    showFavorites() {
-        const favorites = Utils.Storage.get('favorites', []);
-        if (favorites.length === 0) {
-            if (window.Chatbot) {
-                window.Chatbot.displayMessage(
-                    '📌 No tienes propiedades guardadas en favoritos',
-                    'bot'
-                );
-            }
-            return;
-        }
-        
-        const favoriteProperties = PropertyManager.getAllProperties()
-            .filter(property => favorites.includes(property.id_temporal));
-        
-        this.displaySearchResults(favoriteProperties);
-        
-        if (window.Chatbot) {
-            window.Chatbot.displayMessage(
-                `❤️ Mostrando ${favoriteProperties.length} propiedades en favoritos`,
-                'bot'
-            );
-        }
-    }
-
-    // Comparar propiedades (placeholder)
-    compareProperties() {
-        if (window.Chatbot) {
-            window.Chatbot.displayMessage(
-                '🔄 Funcionalidad de comparación próximamente disponible',
-                'bot'
-            );
-        }
-    }
-
-    // Exportar resultados (placeholder)
-    exportResults() {
-        if (window.Chatbot) {
-            window.Chatbot.displayMessage(
-                '📄 Funcionalidad de exportación próximamente disponible',
-                'bot'
-            );
-        }
-    }
-
-    // Compartir resultados (placeholder)
-    shareResults() {
-        if (navigator.share) {
-            navigator.share({
-                title: 'Propiedades - Dante Propiedades',
-                text: 'Mira estas propiedades increíbles',
-                url: window.location.href
-            });
-        } else {
-            // Fallback: copiar URL al portapapeles
-            navigator.clipboard.writeText(window.location.href);
-            if (window.Chatbot) {
-                window.Chatbot.displayMessage(
-                    '🔗 URL copiada al portapapeles',
-                    'bot'
-                );
-            }
-        }
-    }
-
-    // Búsqueda instantánea
-    performInstantSearch(query) {
-        const filters = PropertyManager.processNaturalLanguageQuery(query);
-        const results = PropertyManager.searchProperties(filters);
-        
-        this.displaySearchResults(results.slice(0, 6)); // Mostrar solo 6 resultados
-        
-        if (window.Chatbot) {
-            window.Chatbot.displayMessage(
-                `🔍 Búsqueda instantánea: "${query}" - ${results.length} resultados`,
-                'bot'
-            );
-        }
-    }
-
-    // Limpiar búsqueda instantánea
-    clearInstantSearch() {
-        this.showAllProperties();
-    }
-
-    // Manejar redimensionamiento
-    handleResize() {
-        // Recalcular posiciones de elementos si es necesario
-        this.repositionElements();
-    }
-
-    // Reposicionar elementos
-    repositionElements() {
-        // Cerrar tooltips en redimensionamiento
-        this.hideTooltip();
-        
-        // Ajustar modal de fotos si está abierto
-        const modal = Utils.DOM.$('#photoModal');
-        if (modal && modal.classList.contains('active')) {
-            // Reajustar posición si es necesario
-        }
-    }
-
-    // Manejar scroll
-    handleScroll() {
-        // Implementar comportamientos de scroll si es necesario
-        // Por ejemplo, lazy loading adicional, mostrar/ocultar elementos, etc.
-    }
-
-    // Manejar errores globales
-    handleGlobalError(error) {
-        ConfigUtils.error('Error global capturado:', error);
-        
-        // Mostrar notificación de error no intrusiva
-        this.showErrorNotification(error);
-    }
-
-    // Mostrar notificación de error
-    showErrorNotification(error) {
-        const notification = Utils.DOM.createElement('div', {
-            className: 'error-notification',
-            style: `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: var(--danger-color);
-                color: white;
-                padding: 15px 20px;
-                border-radius: var(--border-radius);
-                box-shadow: var(--shadow-lg);
-                z-index: 10000;
-                max-width: 300px;
-                animation: slideInRight 0.3s ease;
-            `
-        }, `
-            <strong>Error:</strong><br>
-            ${error.message || 'Ha ocurrido un error inesperado'}
-        `);
-        
-        document.body.appendChild(notification);
-        
-        // Auto-remover después de 5 segundos
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 5000);
-    }
-
-    // Manejar promesas rechazadas no manejadas
-    handleUnhandledRejection(reason) {
-        ConfigUtils.error('Promesa rechazada no manejada:', reason);
-    }
-
-    // Obtener estado de la aplicación
-    getState() {
-        return {
-            isInitialized: this.isInitialized,
-            components: { ...this.components },
-            lastActivity: this.lastMessageTime
-        };
-    }
-
-    // ===== NUEVAS FUNCIONES INTEGRADAS =====
+// SISTEMA DINÁMICO PARA CHATBOT - CARGA TODO DESDE PROPIEDADES.JSON
+// Todas las imágenes, filtros y configuraciones se generan automáticamente
+
+// Variable global para almacenar las propiedades cargadas dinámicamente
+let sistemaPropiedades = {
+    propiedades: [],
+    tiposDisponibles: [],
+    barriosDisponibles: [],
+    operacionesDisponibles: [],
+    amenidadesDisponibles: [],
+    imagenesDisponibles: []
+};
+
+// Inicializar el sistema dinámico
+async function inicializarSistemaDinamico() {
+    console.log('🚀 Inicializando sistema dinámico...');
     
-    // Configurar búsqueda avanzada
-    setupAdvancedSearch() {
-        const searchBtn = Utils.DOM.$('#searchBtn');
-        const resetBtn = Utils.DOM.$('#resetBtn');
-        const showAllBtn = Utils.DOM.$('#showAllBtn');
+    try {
+        // Cargar propiedades desde el archivo JSON
+        const response = await fetch('propiedades.json');
+        const propiedades = await response.json();
         
-        if (searchBtn) {
-            searchBtn.addEventListener('click', () => this.executeAdvancedSearch());
-        }
+        // Almacenar propiedades
+        sistemaPropiedades.propiedades = propiedades;
         
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => this.resetFilters());
-        }
+        // Generar datos dinámicos
+        generarTiposDisponibles();
+        generarBarriosDisponibles();
+        generarOperacionesDisponibles();
+        generarAmenidadesDisponibles();
+        generarImagenesDisponibles();
         
-        if (showAllBtn) {
-            showAllBtn.addEventListener('click', () => this.showAllProperties());
-        }
+        console.log('✅ Sistema dinámico inicializado correctamente');
+        console.log(`📊 ${propiedades.length} propiedades cargadas`);
+        console.log(`🏷️ ${sistemaPropiedades.tiposDisponibles.length} tipos disponibles`);
+        console.log(`📍 ${sistemaPropiedades.barriosDisponibles.length} barrios disponibles`);
         
-        // Llenar filtros dinámicamente cuando estén disponibles
-        this.populateFiltersWhenReady();
-    }
-    
-    // Ejecutar búsqueda avanzada
-    executeAdvancedSearch() {
-        const filters = this.getAdvancedFilters();
-        const properties = PropertyManager.getFilteredProperties(filters);
-        
-        this.displayProperties(properties);
-        this.updateSearchStats(properties.length);
-        
-        // También buscar en el chatbot
-        if (window.Chatbot) {
-            const filterDescription = this.describeFilters(filters);
-            window.Chatbot.displaySearchResults(properties, filterDescription);
-        }
-    }
-    
-    // Obtener filtros de la búsqueda avanzada
-    getAdvancedFilters() {
-        const filters = {
-            barrios: [],
-            tipos: [],
-            operaciones: [],
-            precio_min: null,
-            precio_max: null,
-            ambientes_min: null,
-            amenities: []
-        };
-        
-        // Barrio
-        const barrioSelect = Utils.DOM.$('#barrio-select');
-        if (barrioSelect && barrioSelect.value) {
-            filters.barrios = [barrioSelect.value];
-        }
-        
-        // Tipo
-        const tipoSelect = Utils.DOM.$('#tipo-select');
-        if (tipoSelect && tipoSelect.value) {
-            filters.tipos = [tipoSelect.value];
-        }
-        
-        // Operación
-        const operacionSelect = Utils.DOM.$('#operacion-select');
-        if (operacionSelect && operacionSelect.value) {
-            filters.operaciones = [operacionSelect.value];
-        }
-        
-        // Precio mínimo
-        const precioMin = Utils.DOM.$('#precio-min');
-        if (precioMin && precioMin.value) {
-            filters.precio_min = parseInt(precioMin.value);
-        }
-        
-        // Precio máximo
-        const precioMax = Utils.DOM.$('#precio-max');
-        if (precioMax && precioMax.value) {
-            filters.precio_max = parseInt(precioMax.value);
-        }
-        
-        // Ambientes mínimos
-        const ambientesMin = Utils.DOM.$('#ambientes-min');
-        if (ambientesMin && ambientesMin.value) {
-            filters.ambientes_min = parseInt(ambientesMin.value);
-        }
-        
-        return filters;
-    }
-    
-    // Describir filtros para mostrar
-    describeFilters(filters) {
-        const parts = [];
-        
-        if (filters.barrios.length > 0) parts.push(`en ${filters.barrios[0]}`);
-        if (filters.tipos.length > 0) parts.push(`${filters.tipos[0]}s`);
-        if (filters.operaciones.length > 0) parts.push(`de ${filters.operaciones[0]}`);
-        if (filters.precio_min) parts.push(`desde $${filters.precio_min.toLocaleString()}`);
-        if (filters.precio_max) parts.push(`hasta $${filters.precio_max.toLocaleString()}`);
-        if (filters.ambientes_min) parts.push(`${filters.ambientes_min}+ ambientes`);
-        
-        return parts.join(' ');
-    }
-    
-    // Mostrar todas las propiedades
-    showAllProperties() {
-        const properties = PropertyManager.getAllProperties();
-        this.displayProperties(properties);
-        this.updateSearchStats(properties.length);
-        
-        if (window.Chatbot) {
-            window.Chatbot.displaySearchResults(properties, 'todas las propiedades');
-        }
-    }
-    
-    // Resetear filtros
-    resetFilters() {
-        // Limpiar selects
-        ['barrio-select', 'tipo-select', 'operacion-select'].forEach(id => {
-            const element = Utils.DOM.$('#' + id);
-            if (element) element.value = '';
-        });
-        
-        // Limpiar inputs numéricos
-        ['precio-min', 'precio-max', 'ambientes-min'].forEach(id => {
-            const element = Utils.DOM.$('#' + id);
-            if (element) element.value = '';
-        });
-        
-        // Mostrar todas las propiedades
-        this.showAllProperties();
-    }
-    
-    // Mostrar propiedades en el área de resultados
-    displayProperties(properties) {
-        const resultsContainer = Utils.DOM.$('#propertyResults');
-        if (!resultsContainer) return;
-        
-        if (properties.length === 0) {
-            resultsContainer.innerHTML = `
-                <div class="no-results">
-                    <h3>🔍 No se encontraron propiedades</h3>
-                    <p>Intenta ajustar tus filtros de búsqueda</p>
-                </div>
-            `;
-            return;
-        }
-        
-        const propertiesHTML = properties.map(property => 
-            PropertyManager.createPropertyCard(property)
-        ).join('');
-        
-        resultsContainer.innerHTML = propertiesHTML;
-        
-        // Scroll suave a los resultados
-        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    
-    // Actualizar estadísticas de búsqueda
-    updateSearchStats(count) {
-        const resultsCount = Utils.DOM.$('#resultsCount');
-        if (resultsCount) {
-            resultsCount.textContent = count;
-        }
-    }
-    
-    // Llenar filtros cuando estén disponibles
-    async populateFiltersWhenReady() {
-        let attempts = 0;
-        while (attempts < 50) {
-            if (PropertyManager.getAvailableFilters) {
-                PropertyManager.populateDynamicFilters();
-                ConfigUtils.debug('Filtros dinámicos poblados');
-                break;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-            attempts++;
-        }
-    }
-    
-    // Manejar eventos del sistema de menú
-    setupMenuSystemIntegration() {
-        // Registrar callback para acciones del menú
-        if (window.MenuSystem && window.MenuSystem.onAction) {
-            window.MenuSystem.onAction((actionType, data) => {
-                this.handleMenuAction(actionType, data);
-            });
-        }
-        
-        // Configurar navegación numérica
-        this.setupNumericNavigation();
-    }
-    
-    // Manejar acciones del menú
-    handleMenuAction(actionType, data) {
-        ConfigUtils.debug('Manejando acción del menú:', { actionType, data });
-        
-        switch (actionType) {
-            case 'FILTER_APPLIED':
-                this.executeAdvancedSearch();
-                break;
-            case 'ALL_PROPERTIES_REQUESTED':
-                this.showAllProperties();
-                break;
-            case 'CONTACT_REQUESTED':
-                this.showContactInfo();
-                break;
-        }
-    }
-    
-    // Configurar navegación numérica
-    setupNumericNavigation() {
-        // Escuchar entrada numérica en el input del chat
-        const messageInput = Utils.DOM.$('#messageInput');
-        if (messageInput) {
-            messageInput.addEventListener('keydown', (e) => {
-                if (e.key >= '0' && e.key <= '9' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-                    // Permitir navegación numérica
-                    ConfigUtils.debug('Navegación numérica:', e.key);
-                }
-            });
-        }
-    }
-    
-    // Mostrar información de contacto
-    showContactInfo() {
-        if (window.Chatbot && window.Chatbot.showContactInfo) {
-            window.Chatbot.showContactInfo();
-        }
-    }
-
-    // Manejar entradas del menú numérico
-    handleMenuInput(option) {
-        console.log('Menu input received:', option);
-        
-        // Enviar entrada al sistema de menú
-        if (window.MenuSystem) {
-            const result = window.MenuSystem.processResponse(option);
-            console.log('Menu response:', result);
-            
-            // Enviar al chatbot si hay acción
-            if (result.action && window.Chatbot) {
-                window.Chatbot.executeMenuAction(result.action);
-            }
-        }
+        return true;
+    } catch (error) {
+        console.error('❌ Error inicializando sistema dinámico:', error);
+        return false;
     }
 }
 
-// Función global para manejar entradas del menú
-function handleMenuInput(input) {
-    console.log('Menu input received:', input);
+// Generar tipos de propiedades dinámicamente
+function generarTiposDisponibles() {
+    const tipos = [...new Set(sistemaPropiedades.propiedades.map(p => p.tipo))];
+    sistemaPropiedades.tiposDisponibles = tipos.map(tipo => ({
+        value: tipo,
+        label: tipo.charAt(0).toUpperCase() + tipo.slice(1),
+        imagenes: getImagenesParaTipo(tipo)
+    }));
+}
+
+// Generar barrios disponibles dinámicamente
+function generarBarriosDisponibles() {
+    sistemaPropiedades.barriosDisponibles = [...new Set(
+        sistemaPropiedades.propiedades.map(p => p.barrio)
+    )].sort();
+}
+
+// Generar operaciones disponibles dinámicamente
+function generarOperacionesDisponibles() {
+    sistemaPropiedades.operacionesDisponibles = [...new Set(
+        sistemaPropiedades.propiedades.map(p => p.operacion)
+    )];
+}
+
+// Generar amenidades disponibles dinámicamente
+function generarAmenidadesDisponibles() {
+    const amenidades = new Set();
     
-    // Enviar entrada al sistema de menú
-    if (window.MenuSystem) {
-        const result = window.MenuSystem.processResponse(input);
-        console.log('Menu response:', result);
-        
-        // Enviar al chatbot si hay acción
-        if (result.action && window.Chatbot) {
-            window.Chatbot.executeMenuAction(result.action);
+    sistemaPropiedades.propiedades.forEach(property => {
+        // Recorrer todas las amenidades disponibles
+        if (property.pileta === 'Si') amenidades.add('pileta');
+        if (property.cochera === 'x') amenidades.add('cochera');
+        if (property.balcon === 'x') amenidades.add('balcon');
+        if (property.aire_acondicionado === 'Si') amenidades.add('aire_acondicionado');
+        if (property.acepta_mascotas === 'Si') amenidades.add('acepta_mascotas');
+    });
+    
+    sistemaPropiedades.amenidadesDisponibles = Array.from(amenidades);
+}
+
+// Generar lista de imágenes disponibles
+function generarImagenesDisponibles() {
+    const imagenes = new Set();
+    
+    sistemaPropiedades.propiedades.forEach(property => {
+        if (property.fotos && Array.isArray(property.fotos)) {
+            property.fotos.forEach(foto => imagenes.add(foto));
         }
+    });
+    
+    sistemaPropiedades.imagenesDisponibles = Array.from(imagenes);
+}
+
+// Obtener imágenes para un tipo específico dinámicamente
+function getImagenesParaTipo(tipo) {
+    const propiedadesDelTipo = sistemaPropiedades.propiedades.filter(p => p.tipo === tipo);
+    const imagenes = [];
+    
+    propiedadesDelTipo.forEach(property => {
+        if (property.fotos && Array.isArray(property.fotos)) {
+            property.fotos.forEach(foto => imagenes.push(foto));
+        }
+    });
+    
+    // Si no hay imágenes específicas, usar las imágenes genéricas
+    if (imagenes.length === 0) {
+        return generarImagenesGenericas(tipo);
+    }
+    
+    return imagenes;
+}
+
+// Generar imágenes genéricas para tipos que no tienen imágenes específicas
+function generarImagenesGenericas(tipo) {
+    const imagenesGenericas = {
+        casa: ['imgs/casa_familiar_3.jpg', 'imgs/casa_familiar_6.jpg', 'imgs/casa_familiar_8.jpg'],
+        departamento: ['imgs/departamento_palermo_1.jpg', 'imgs/departamento_palermo_4.jpg', 'imgs/departamento_palermo_7.jpg'],
+        monoambiente: ['imgs/monoambiente_1.jpg', 'imgs/monoambiente_3.jpg', 'imgs/monoambiente_8.JPEG'],
+        apartamento: ['imgs/apartamento_lujo_0.jpg', 'imgs/apartamento_lujo_2.jpg', 'imgs/apartamento_lujo_7.jpg'],
+        edificio: ['imgs/edificio_1.jpg', 'imgs/edificio_7.jpg', 'imgs/edificio_8.jpg']
+    };
+    
+    return imagenesGenericas[tipo] || ['imgs/imagen-propiedad.svg'];
+}
+
+// Función principal para obtener imagen de propiedad (DINÁMICA)
+function obtenerImagenPropiedad(property) {
+    // Primera opción: usar las fotos reales de la propiedad
+    if (property.fotos && Array.isArray(property.fotos) && property.fotos.length > 0) {
+        // Seleccionar imagen basada en el ID para consistencia
+        const index = Math.abs(hashCode(property.id_temporal)) % property.fotos.length;
+        return property.fotos[index];
+    }
+    
+    // Segunda opción: buscar imágenes del mismo tipo
+    const imagenesDelTipo = getImagenesParaTipo(property.tipo);
+    if (imagenesDelTipo.length > 0) {
+        const index = Math.abs(hashCode(property.id_temporal)) % imagenesDelTipo.length;
+        return imagenesDelTipo[index];
+    }
+    
+    // Tercera opción: imagen por defecto
+    return 'imgs/imagen-propiedad.svg';
+}
+
+// Función hash simple para obtener un número consistente
+function hashCode(str) {
+    let hash = 0;
+    if (str.length == 0) return hash;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
+
+// Función para crear el HTML de la imagen de propiedad
+function crearImagenPropiedadHTML(property) {
+    const imagenSrc = obtenerImagenPropiedad(property);
+    
+    return `
+        <div class="property-image">
+            <img src="${imagenSrc}" 
+                 alt="${property.titulo}" 
+                 style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;"
+                 onerror="this.src='imgs/imagen-propiedad.svg'"
+                 loading="lazy">
+        </div>
+    `;
+}
+
+// Función para crear el HTML completo de la tarjeta de propiedad con imagen (DINÁMICA)
+function crearTarjetaPropiedad(property) {
+    return `
+        <div class="property-card">
+            ${crearImagenPropiedadHTML(property)}
+            <h3>${property.titulo}</h3>
+            <div class="property-info">
+                <div class="info-item">
+                    <span>📍</span>
+                    <span><strong>Ubicación:</strong> ${property.barrio}</span>
+                </div>
+                <div class="info-item">
+                    <span>💰</span>
+                    <span><strong>Precio:</strong> $${property.precio ? property.precio.toLocaleString() : 'N/A'} ${property.moneda_precio || 'USD'}</span>
+                </div>
+                <div class="info-item">
+                    <span>🛏️</span>
+                    <span><strong>Ambientes:</strong> ${property.ambientes || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <span>📐</span>
+                    <span><strong>Superficie:</strong> ${property.metros_cuadrados || 'N/A'} m²</span>
+                </div>
+                <div class="info-item">
+                    <span>🏢</span>
+                    <span><strong>Tipo:</strong> ${property.tipo ? property.tipo.charAt(0).toUpperCase() + property.tipo.slice(1) : 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <span>💰</span>
+                    <span><strong>Operación:</strong> ${property.operacion ? property.operacion.charAt(0).toUpperCase() + property.operacion.slice(1) : 'N/A'}</span>
+                </div>
+            </div>
+            
+            <div class="property-amenities">
+                ${property.pileta === 'Si' ? '<span class="amenity">🏊 Pileta</span>' : ''}
+                ${property.cochera === 'x' ? '<span class="amenity">🚗 Cochera</span>' : ''}
+                ${property.balcon === 'x' ? '<span class="amenity">🏞️ Balcón</span>' : ''}
+                ${property.aire_acondicionado === 'Si' ? '<span class="amenity">❄️ Aire Acondicionado</span>' : ''}
+                ${property.acepta_mascotas === 'Si' ? '<span class="amenity">🐕 Mascotas</span>' : ''}
+            </div>
+            
+            ${property.descripcion ? `<p style="color: #666; margin-bottom: 15px;">${property.descripcion}</p>` : ''}
+            
+            <div class="property-actions">
+                <a href="#" class="btn btn-primary" onclick="showPropertyDetails('${property.id_temporal}')">
+                    📸 Ver Fotos
+                </a>
+                <a href="formulario.html" class="btn btn-secondary">
+                    💬 Contactar
+                </a>
+                <a href="#" class="btn btn-secondary" onclick="saveToFavorites('${property.id_temporal}')">
+                    ❤️ Guardar
+                </a>
+            </div>
+        </div>
+    `;
+}
+
+// Función para llenar dinámicamente los filtros
+function llenarFiltrosDinamicos() {
+    // Llenar selectores con datos dinámicos
+    llenarSelectorBarrios();
+    llenarSelectorTipos();
+    // Las operaciones ya están predefinidas pero se pueden hacer dinámicas también
+}
+
+// Llenar selector de barrios dinámicamente
+function llenarSelectorBarrios() {
+    const barrioSelect = document.getElementById('barrio-select');
+    if (!barrioSelect) return;
+    
+    // Limpiar opciones existentes excepto la primera
+    while (barrioSelect.children.length > 1) {
+        barrioSelect.removeChild(barrioSelect.lastChild);
+    }
+    
+    // Agregar opciones dinámicas
+    sistemaPropiedades.barriosDisponibles.forEach(barrio => {
+        const option = document.createElement('option');
+        option.value = barrio;
+        option.textContent = barrio;
+        barrioSelect.appendChild(option);
+    });
+}
+
+// Llenar selector de tipos dinámicamente
+function llenarSelectorTipos() {
+    const tipoSelect = document.getElementById('tipo-select');
+    if (!tipoSelect) return;
+    
+    // Limpiar opciones existentes excepto la primera
+    while (tipoSelect.children.length > 1) {
+        tipoSelect.removeChild(tipoSelect.lastChild);
+    }
+    
+    // Agregar opciones dinámicas
+    sistemaPropiedades.tiposDisponibles.forEach(tipo => {
+        const option = document.createElement('option');
+        option.value = tipo.value;
+        option.textContent = tipo.label;
+        tipoSelect.appendChild(option);
+    });
+}
+
+// Función para obtener propiedades filtradas dinámicamente
+function obtenerPropiedadesFiltradas(filtros) {
+    return sistemaPropiedades.propiedades.filter(property => {
+        // Filtrar por barrio
+        if (filtros.barrios.length > 0 && !filtros.barrios.includes(property.barrio)) {
+            return false;
+        }
+        
+        // Filtrar por tipo
+        if (filtros.tipos.length > 0 && !filtros.tipos.includes(property.tipo)) {
+            return false;
+        }
+        
+        // Filtrar por operación
+        if (filtros.operaciones.length > 0 && !filtros.operaciones.includes(property.operacion)) {
+            return false;
+        }
+        
+        // Filtrar por precio
+        if (filtros.precio_min && property.precio < filtros.precio_min) {
+            return false;
+        }
+        if (filtros.precio_max && property.precio > filtros.precio_max) {
+            return false;
+        }
+        
+        // Filtrar por ambientes
+        if (filtros.ambientes_min && property.ambientes < filtros.ambientes_min) {
+            return false;
+        }
+        
+        return true;
+    });
+}
+
+// Exportar funciones para uso global
+window.obtenerImagenPropiedad = obtenerImagenPropiedad;
+window.crearImagenPropiedadHTML = crearImagenPropiedadHTML;
+window.crearTarjetaPropiedad = crearTarjetaPropiedad;
+window.llenarFiltrosDinamicos = llenarFiltrosDinamicos;
+window.obtenerPropiedadesFiltradas = obtenerPropiedadesFiltradas;
+window.sistemaPropiedades = sistemaPropiedades;
+
+// Inicializar cuando el DOM esté listo
+function inicializarSiEsPosible() {
+    if (typeof inicializarSistemaDinamico === 'function') {
+        inicializarSistemaDinamico();
+    } else {
+        console.log('⏳ Esperando carga de funciones del sistema...');
+        setTimeout(inicializarSiEsPosible, 100);
     }
 }
 
-// Hacer la función disponible globalmente
-window.handleMenuInput = handleMenuInput;
-
-// Crear instancia global de la aplicación
-window.app = new App();
-
-// Hacer disponible globalmente para onclick handlers
-window.app = window.app;
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializarSiEsPosible);
+} else {
+    inicializarSiEsPosible();
+}

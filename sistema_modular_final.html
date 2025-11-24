@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Búsqueda Inteligente de Propiedades - Dante Propiedades</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .chat-container {
+            padding: 25px;
+            height: 500px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            border-radius: 15px;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .bot-message {
+            background: #f8f9ff;
+            color: #333;
+            margin-right: 50px;
+            border: 1px solid #e1e8ff;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: 50px;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .input-container input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-container input:focus {
+            border-color: #667eea;
+        }
+
+        .input-container button {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .input-container button:hover {
+            transform: translateY(-2px);
+        }
+
+        .typing-indicator {
+            background: #f8f9ff;
+            color: #333;
+            margin-right: 50px;
+            border: 1px solid #e1e8ff;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .stats {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 4px solid #ffc107;
+        }
+
+        .nota-navegacion {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Dante Propiedades</h1>
+            <p>🤖 Asistente Modular con Navegación Numérica</p>
+        </div>
+        
+        <div class="nota-navegacion">
+            🔢 <strong>NAVEGACIÓN NUMÉRICA:</strong> Usa solo números para navegar (1, 2, 3, 0)<br>
+            📍 El botón "0" siempre te lleva al menú anterior
+        </div>
+        
+        <div class="stats" id="statsContainer">
+            📊 Cargando propiedades...
+        </div>
+        
+        <div class="chat-container" id="chatContainer">
+            <!-- Los mensajes aparecerán aquí -->
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="messageInput" placeholder="Escribe tu respuesta aquí..." maxlength="100">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        let propiedades = [];
+        let currentMenu = 'principal';
+        let menuHistory = ['principal'];
+
+        const menuData = {
+            principal: {
+                titulo: "Menú Principal",
+                contenido: "🏠 ¡Hola! Soy tu asistente inmobiliario.\n\n📋 Menú Principal:\n1. Buscar propiedad\n2. Ver todas las propiedades\n3. Ayuda\n0. Salir\n\n💡 Usa SOLO números para navegar",
+                opciones: {
+                    "1": { tipo: "navegacion", siguiente: "busqueda" },
+                    "2": { tipo: "accion", nombre: "mostrar_todas" },
+                    "3": { tipo: "accion", nombre: "ayuda" },
+                    "0": { tipo: "accion", nombre: "salir" }
+                }
+            },
+            busqueda: {
+                titulo: "Búsqueda de Propiedades", 
+                contenido: "🔍 Opciones de Búsqueda:\n1. Por tipo de propiedad\n2. Por barrio\n3. Por precio\n4. Ver todas\n0. Volver\n\n💡 Escribe solo el número",
+                opciones: {
+                    "1": { tipo: "navegacion", siguiente: "tipos" },
+                    "2": { tipo: "accion", nombre: "buscar_barrio" },
+                    "3": { tipo: "accion", nombre: "buscar_precio" },
+                    "4": { tipo: "accion", nombre: "mostrar_todas" },
+                    "0": { tipo: "navegacion", siguiente: "principal" }
+                }
+            },
+            tipos: {
+                titulo: "Tipos de Propiedad",
+                contenido: "🏘️ Tipos de Propiedad:\n1. Casas\n2. Departamentos\n3. Locales\n4. Oficinas\n5. Ver todas\n0. Volver\n\n💡 Escribe solo el número",
+                opciones: {
+                    "1": { tipo: "accion", nombre: "filtrar_tipo", valor: "casa" },
+                    "2": { tipo: "accion", nombre: "filtrar_tipo", valor: "departamento" },
+                    "3": { tipo: "accion", nombre: "filtrar_tipo", valor: "local" },
+                    "4": { tipo: "accion", nombre: "filtrar_tipo", valor: "oficina" },
+                    "5": { tipo: "accion", nombre: "mostrar_todas" },
+                    "0": { tipo: "navegacion", siguiente: "busqueda" }
+                }
+            }
+        };
+
+        async function loadProperties() {
+            try {
+                const response = await fetch('propiedades.json');
+                propiedades = await response.json();
+                updateStats();
+                
+                // Mostrar mensaje de bienvenida
+                mostrarMenuPrincipal();
+            } catch (error) {
+                console.error('Error cargando propiedades:', error);
+                document.getElementById('statsContainer').innerHTML = 
+                    '❌ Error cargando propiedades';
+                // Mostrar menú de todos modos
+                mostrarMenuPrincipal();
+            }
+        }
+
+        function updateStats() {
+            const tipos = [...new Set(propiedades.map(p => p.tipo))].length;
+            const barrios = [...new Set(propiedades.map(p => p.barrio))].length;
+            const amenities = [...new Set(propiedades.flatMap(p => 
+                p.amenities ? p.amenities.split(',').map(a => a.trim()) : []
+            ))].length;
+
+            document.getElementById('statsContainer').innerHTML = 
+                `📊 Tengo <strong>${propiedades.length}</strong> propiedades con <strong>${tipos}</strong> tipos diferentes, <strong>${barrios}</strong> barrios y <strong>${amenities}</strong> amenidades.`;
+        }
+
+        function mostrarMenuPrincipal() {
+            const respuesta = menuData.principal;
+            currentMenu = 'principal';
+            menuHistory = ['principal'];
+            
+            showMessage(respuesta.contenido, false);
+        }
+
+        function procesarMensaje(mensaje) {
+            const menu = menuData[currentMenu];
+            const entrada = mensaje.trim();
+
+            if (!menu.opciones[entrada]) {
+                showMessage(`❌ Opción no válida: "${entrada}"\n\n${menu.contenido}`, false);
+                return;
+            }
+
+            const opcion = menu.opciones[entrada];
+
+            if (opcion.tipo === "navegacion") {
+                // Navegar a nuevo menú
+                currentMenu = opcion.siguiente;
+                menuHistory.push(currentMenu);
+                const nuevoMenu = menuData[currentMenu];
+                showMessage(nuevoMenu.contenido, false);
+
+            } else if (opcion.tipo === "accion") {
+                // Ejecutar acción
+                ejecutarAccion(opcion.nombre, opcion.valor);
+            }
+        }
+
+        function ejecutarAccion(accion, valor) {
+            switch (accion) {
+                case 'mostrar_todas':
+                    mostrarTodasPropiedades();
+                    break;
+                case 'ayuda':
+                    mostrarAyuda();
+                    break;
+                case 'salir':
+                    showMessage("👋 ¡Gracias por usar Dante Propiedades!\n\n💬 Escribe 'Hola' para comenzar de nuevo.", false);
+                    break;
+                case 'filtrar_tipo':
+                    filtrarPorTipo(valor);
+                    break;
+                case 'buscar_barrio':
+                    mostrarBarrios();
+                    break;
+                case 'buscar_precio':
+                    mostrarRangosPrecios();
+                    break;
+            }
+        }
+
+        function mostrarTodasPropiedades() {
+            if (propiedades.length === 0) {
+                showMessage("❌ No hay propiedades cargadas.", false);
+                return;
+            }
+
+            let contenido = `🏠 <strong>Todas las Propiedades (${propiedades.length}):</strong>\n\n`;
+            
+            propiedades.forEach((prop, index) => {
+                const precio = prop.precio ? `$${prop.precio.toLocaleString()} ${prop.moneda_precio || 'USD'}` : 'Consultar precio';
+                contenido += `${index + 1}. ${prop.titulo}\n   📍 ${prop.barrio} | ${precio}\n   🏠 ${prop.tipo} | ${prop.ambientes || 1} ambientes\n\n`;
+            });
+
+            showMessage(contenido, false);
+            // Volver al menú principal
+            setTimeout(() => {
+                showMessage(menuData.principal.contenido, false);
+            }, 1000);
+        }
+
+        function filtrarPorTipo(tipo) {
+            const filtradas = propiedades.filter(p => 
+                p.tipo.toLowerCase() === tipo.toLowerCase()
+            );
+
+            if (filtradas.length === 0) {
+                showMessage(`❌ No encontré propiedades de tipo "${tipo}"`, false);
+            } else {
+                let contenido = `🏠 <strong>${tipo.charAt(0).toUpperCase() + tipo.slice(1)} (${filtradas.length}):</strong>\n\n`;
+                
+                filtradas.forEach((prop, index) => {
+                    const precio = prop.precio ? `$${prop.precio.toLocaleString()} ${prop.moneda_precio || 'USD'}` : 'Consultar precio';
+                    contenido += `${index + 1}. ${prop.titulo}\n   📍 ${prop.barrio} | ${precio}\n   🏠 ${prop.tipo} | ${prop.ambientes || 1} ambientes\n\n`;
+                });
+
+                showMessage(contenido, false);
+            }
+
+            // Mostrar menú de tipos nuevamente
+            setTimeout(() => {
+                showMessage(menuData.tipos.contenido, false);
+            }, 2000);
+        }
+
+        function mostrarAyuda() {
+            const ayuda = `
+❓ <strong>AYUDA DEL SISTEMA MODULAR</strong>
+
+🔢 <strong>NAVEGACIÓN NUMÉRICA:</strong>
+• Usa SOLO números para navegar (1, 2, 3, 0)
+• '0' siempre te lleva al menú anterior
+• Los menús se generan dinámicamente
+
+🎯 <strong>FLUJO DE NAVEGACIÓN:</strong>
+1. Menú Principal → Búsqueda → Tipos → Casas
+2. En cualquier punto: '0' para volver atrás
+3. '2' en menú principal para ver todas las propiedades
+
+💡 <strong>EJEMPLOS:</strong>
+• "1" → Buscar propiedad
+• "1" → Tipos de propiedad
+• "1" → Casas
+• "0" → Volver al menú anterior
+            `;
+            showMessage(ayuda, false);
+        }
+
+        function mostrarBarrios() {
+            const barrios = [...new Set(propiedades.map(p => p.barrio))].sort();
+            let contenido = `📍 <strong>Barrios Disponibles:</strong>\n\n`;
+            
+            barrios.forEach((barrio, index) => {
+                const count = propiedades.filter(p => p.barrio === barrio).length;
+                contenido += `${index + 1}. ${barrio} (${count} propiedades)\n`;
+            });
+            
+            contenido += `\n💡 Escribe el número del barrio deseado\n0. Volver al menú de búsqueda`;
+            showMessage(contenido, false);
+        }
+
+        function mostrarRangosPrecios() {
+            const contenido = `
+💰 <strong>Rangos de Precio:</strong>
+1. Hasta $100,000 USD
+2. $100,000 - $300,000 USD  
+3. $300,000 - $500,000 USD
+4. Más de $500,000 USD
+
+💡 Escribe el número del rango deseado
+0. Volver al menú de búsqueda
+            `;
+            showMessage(contenido, false);
+        }
+
+        function showMessage(text, isUser = false) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Mostrar mensaje del usuario
+            showMessage(message, true);
+            input.value = '';
+            
+            // Procesar mensaje después de un breve delay
+            setTimeout(() => {
+                procesarMensaje(message);
+            }, 500);
+        }
+
+        // Manejar Enter key
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Inicializar sistema cuando se carga la página
+        window.onload = function() {
+            loadProperties();
+            document.getElementById('messageInput').focus();
+        };
+    </script>
+</body>
+</html>
