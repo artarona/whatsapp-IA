@@ -1,0 +1,19 @@
+[
+  {
+    "id": "CONS_20251124_122307",
+    "fecha": "2025-11-24T12:23:07.433418",
+    "nombre": "Test Usuario",
+    "telefono": "+54 9 11 1234-5678",
+    "email": "test@email.com",
+    "propiedades_interes": [
+      {
+        "id_temporal": "TEST001",
+        "titulo": "Propiedad de prueba",
+        "barrio": "Microcentro",
+        "tipo": "departamento",
+        "precio": 500000,
+        "moneda_precio": "ARS"
+      }
+    ]
+  }
+]
