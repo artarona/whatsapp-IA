@@ -31,12 +31,17 @@ def guardar_consulta(consulta):
         json.dump(consultas, f, ensure_ascii=False, indent=2)
 
 class ChatbotHandler(BaseHTTPRequestHandler):
+    def add_cors_headers(self):
+        """Agregar cabeceras CORS a todas las respuestas"""
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Accept')
+        self.send_header('Access-Control-Max-Age', '86400')
+
     def do_OPTIONS(self):
         """Manejar peticiones OPTIONS para CORS"""
         self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.add_cors_headers()
         self.end_headers()
 
     def do_POST(self):
@@ -92,7 +97,7 @@ class ChatbotHandler(BaseHTTPRequestHandler):
             consultas = cargar_consultas()
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
+            self.add_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(consultas).encode('utf-8'))
             
@@ -123,7 +128,7 @@ class ChatbotHandler(BaseHTTPRequestHandler):
             
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
+            self.add_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(stats).encode('utf-8'))
             
@@ -177,7 +182,7 @@ class ChatbotHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'text/csv')
             self.send_header('Content-Disposition', f'attachment; filename="{filename}"')
-            self.send_header('Access-Control-Allow-Origin', '*')
+            self.add_cors_headers()
             self.end_headers()
             
             self.wfile.write(csv_content.encode('utf-8'))
@@ -189,10 +194,12 @@ class ChatbotHandler(BaseHTTPRequestHandler):
                     contenido = f.read()
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
+                self.add_cors_headers()
                 self.end_headers()
                 self.wfile.write(contenido.encode('utf-8'))
             except Exception as e:
                 self.send_response(500)
+                self.add_cors_headers()
                 self.end_headers()
         
         else:
