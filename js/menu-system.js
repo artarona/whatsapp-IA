@@ -614,7 +614,7 @@ class MenuSystem {
                        `**4. Integración WhatsApp:**\n` +
                        `• Contacto directo con propiedades\n` +
                        `• Información pre-cargada\n` +
-                       `• Respuesta automática`;\        
+                       `• Respuesta automática`;
         return {
             action: { type: 'HELP', topic: 'chatbot' },
             content
@@ -671,10 +671,37 @@ class MenuSystem {
             }
         }
     }
+
+    // Refrescar menús dinámicamente cuando se cargan las propiedades
+    refreshMenus() {
+        this.menus = this.initializeMenus();
+        ConfigUtils.info('Menús regenerados dinámicamente');
+        
+        // Si estamos en un menú que fue regenerado, actualizar la vista
+        if (this.currentMenu) {
+            return this.showMenu(this.currentMenu);
+        }
+    }
+
+    // Configurar escucha de eventos de propiedades
+    setupPropertyEvents() {
+        // Escuchar evento de propiedades cargadas
+        window.addEventListener('propertiesLoaded', (event) => {
+            ConfigUtils.info('Propiedades cargadas, regenerando menús...');
+            setTimeout(() => {
+                this.refreshMenus();
+            }, 500); // Pequeño delay para asegurar que todo esté listo
+        });
+    }
 }
 
 // Crear instancia global
 window.MenuSystem = new MenuSystem();
+
+// Configurar escucha de eventos cuando la instancia esté lista
+if (typeof window !== 'undefined') {
+    window.MenuSystem.setupPropertyEvents();
+}
 
 // Exportar para uso en módulos
 if (typeof module !== 'undefined' && module.exports) {
