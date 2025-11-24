@@ -3,425 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 Búsqueda Inteligente de Propiedades - Dante Propiedades</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-radius: 15px;
-            overflow: hidden;
-            margin-top: 20px;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 16px;
-        }
-
-        .chat-container {
-            padding: 25px;
-            height: 500px;
-            overflow-y: auto;
-            background: #fafafa;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            padding: 15px 20px;
-            border-radius: 15px;
-            line-height: 1.6;
-            position: relative;
-        }
-
-        .bot-message {
-            background: #f8f9ff;
-            color: #333;
-            margin-right: 50px;
-            border: 1px solid #e1e8ff;
-        }
-
-        .user-message {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            margin-left: 50px;
-        }
-
-        .input-container {
-            display: flex;
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #eee;
-        }
-
-        .input-container input {
-            flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .input-container input:focus {
-            border-color: #667eea;
-        }
-
-        .input-container button {
-            padding: 15px 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            margin-left: 10px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .input-container button:hover {
-            transform: translateY(-2px);
-        }
-
-        .typing-indicator {
-            background: #f8f9ff;
-            color: #333;
-            margin-right: 50px;
-            border: 1px solid #e1e8ff;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-style: italic;
-            opacity: 0.8;
-        }
-
-        .stats {
-            background: #fff3cd;
-            color: #856404;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            border-left: 4px solid #ffc107;
-        }
-
-        .nota-navegacion {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #28a745;
-            font-weight: bold;
-        }
-    </style>
+    <title>🏠 Dante Propiedades - Búsqueda Inteligente</title>
+    <link rel="icon" href="assets/icons/llave.png" type="image/png">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/chatbot.css">
+    <link rel="stylesheet" href="css/properties.css">
+    <link rel="stylesheet" href="css/gallery.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🏠 Dante Propiedades</h1>
-            <p>🤖 Asistente Modular con Navegación Numérica</p>
+    <!-- Header Principal -->
+    <header class="header">
+        <div class="container">
+            <h1>
+                🏠 Dante Propiedades
+                <span class="chatbot-badge">🤖 Chatbot Inteligente</span>
+            </h1>
+            <p>Sistema de búsqueda automática y consulta inteligente</p>
         </div>
-        
-        <div class="nota-navegacion">
-            🔢 <strong>NAVEGACIÓN NUMÉRICA:</strong> Usa solo números para navegar (1, 2, 3, 0)<br>
-            📍 El botón "0" siempre te lleva al menú anterior
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Interfaz del Chatbot -->
+            <section class="chatbot-section">
+                <div class="chatbot-container">
+                    <div class="chatbot-header">
+                        <h2>🤖 Asistente Virtual</h2>
+                        <p>Busca propiedades usando lenguaje natural</p>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message bot-message" id="welcomeMessage">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <div class="quick-commands">
+                        <h3>⚡ Consultas Rápidas:</h3>
+                        <div class="command-buttons" id="quickCommands">
+                            <!-- Se llenan dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <input type="text" 
+                               id="messageInput" 
+                               placeholder="Ej: 'busco departamento en Palermo de 2 ambientes'"
+                               maxlength="300">
+                        <button class="send-button" id="sendButton">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Búsqueda Avanzada -->
+            <section class="search-section">
+                <div class="search-filters">
+                    <h3>🔍 Búsqueda Avanzada</h3>
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="barrio-select">Barrio</label>
+                            <select id="barrio-select">
+                                <option value="">Todos los barrios</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="tipo-select">Tipo</label>
+                            <select id="tipo-select">
+                                <option value="">Todos los tipos</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="operacion-select">Operación</label>
+                            <select id="operacion-select">
+                                <option value="">Todas las operaciones</option>
+                                <option value="venta">Venta</option>
+                                <option value="alquiler">Alquiler</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="precio-min">Precio mínimo (USD)</label>
+                            <input type="number" id="precio-min" placeholder="Ej: 100000">
+                        </div>
+                        <div class="filter-group">
+                            <label for="precio-max">Precio máximo (USD)</label>
+                            <input type="number" id="precio-max" placeholder="Ej: 300000">
+                        </div>
+                        <div class="filter-group">
+                            <label for="ambientes-min">Mín. ambientes</label>
+                            <input type="number" id="ambientes-min" placeholder="Ej: 2">
+                        </div>
+                    </div>
+                    <div class="search-actions">
+                        <button class="btn btn-primary" id="searchBtn">🔍 Buscar Propiedades</button>
+                        <button class="btn btn-secondary" id="resetBtn">🏠 Limpiar Filtros</button>
+                        <button class="btn btn-secondary" id="showAllBtn">📋 Ver Todas</button>
+                    </div>
+                </div>
+                
+                <div class="search-stats" id="searchStats">
+                    📊 <span id="resultsCount">0</span> propiedades encontradas
+                </div>
+
+                <!-- Resultados -->
+                <div class="property-results" id="propertyResults">
+                    <div class="no-results" id="noResults">
+                        <h3>🔍 Escribe tu consulta para ver propiedades</h3>
+                        <p>Usa el chatbot de arriba o los filtros de búsqueda avanzada</p>
+                    </div>
+                </div>
+            </section>
         </div>
-        
-        <div class="stats" id="statsContainer">
-            📊 Cargando propiedades...
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Dante Propiedades. Todos los derechos reservados.</p>
+            <p>📞 +54 11 2536-8595 | 📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3d54535b527d595c5349584d4f524d5458595c59584e135e5250">[email&#160;protected]</a></p>
         </div>
-        
-        <div class="chat-container" id="chatContainer">
-            <!-- Los mensajes aparecerán aquí -->
-        </div>
-        
-        <div class="input-container">
-            <input type="text" id="messageInput" placeholder="Escribe tu respuesta aquí..." maxlength="100">
-            <button onclick="sendMessage()">Enviar</button>
-        </div>
+    </footer>
+
+    <!-- WhatsApp Button -->
+    <div class="whatsapp-fixed">
+        <a href="https://wa.me/5491125368595" target="_blank" class="btn-whatsapp">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+            </svg>
+        </a>
     </div>
 
-    <script>
-        let propiedades = [];
-        let currentMenu = 'principal';
-        let menuHistory = ['principal'];
-
-        const menuData = {
-            principal: {
-                titulo: "Menú Principal",
-                contenido: "🏠 ¡Hola! Soy tu asistente inmobiliario.\n\n📋 Menú Principal:\n1. Buscar propiedad\n2. Ver todas las propiedades\n3. Ayuda\n0. Salir\n\n💡 Usa SOLO números para navegar",
-                opciones: {
-                    "1": { tipo: "navegacion", siguiente: "busqueda" },
-                    "2": { tipo: "accion", nombre: "mostrar_todas" },
-                    "3": { tipo: "accion", nombre: "ayuda" },
-                    "0": { tipo: "accion", nombre: "salir" }
-                }
-            },
-            busqueda: {
-                titulo: "Búsqueda de Propiedades", 
-                contenido: "🔍 Opciones de Búsqueda:\n1. Por tipo de propiedad\n2. Por barrio\n3. Por precio\n4. Ver todas\n0. Volver\n\n💡 Escribe solo el número",
-                opciones: {
-                    "1": { tipo: "navegacion", siguiente: "tipos" },
-                    "2": { tipo: "accion", nombre: "buscar_barrio" },
-                    "3": { tipo: "accion", nombre: "buscar_precio" },
-                    "4": { tipo: "accion", nombre: "mostrar_todas" },
-                    "0": { tipo: "navegacion", siguiente: "principal" }
-                }
-            },
-            tipos: {
-                titulo: "Tipos de Propiedad",
-                contenido: "🏘️ Tipos de Propiedad:\n1. Casas\n2. Departamentos\n3. Locales\n4. Oficinas\n5. Ver todas\n0. Volver\n\n💡 Escribe solo el número",
-                opciones: {
-                    "1": { tipo: "accion", nombre: "filtrar_tipo", valor: "casa" },
-                    "2": { tipo: "accion", nombre: "filtrar_tipo", valor: "departamento" },
-                    "3": { tipo: "accion", nombre: "filtrar_tipo", valor: "local" },
-                    "4": { tipo: "accion", nombre: "filtrar_tipo", valor: "oficina" },
-                    "5": { tipo: "accion", nombre: "mostrar_todas" },
-                    "0": { tipo: "navegacion", siguiente: "busqueda" }
-                }
-            }
-        };
-
-        async function loadProperties() {
-            try {
-                const response = await fetch('propiedades.json');
-                propiedades = await response.json();
-                updateStats();
-                
-                // Mostrar mensaje de bienvenida
-                mostrarMenuPrincipal();
-            } catch (error) {
-                console.error('Error cargando propiedades:', error);
-                document.getElementById('statsContainer').innerHTML = 
-                    '❌ Error cargando propiedades';
-                // Mostrar menú de todos modos
-                mostrarMenuPrincipal();
-            }
-        }
-
-        function updateStats() {
-            const tipos = [...new Set(propiedades.map(p => p.tipo))].length;
-            const barrios = [...new Set(propiedades.map(p => p.barrio))].length;
-            const amenities = [...new Set(propiedades.flatMap(p => 
-                p.amenities ? p.amenities.split(',').map(a => a.trim()) : []
-            ))].length;
-
-            document.getElementById('statsContainer').innerHTML = 
-                `📊 Tengo <strong>${propiedades.length}</strong> propiedades con <strong>${tipos}</strong> tipos diferentes, <strong>${barrios}</strong> barrios y <strong>${amenities}</strong> amenidades.`;
-        }
-
-        function mostrarMenuPrincipal() {
-            const respuesta = menuData.principal;
-            currentMenu = 'principal';
-            menuHistory = ['principal'];
-            
-            showMessage(respuesta.contenido, false);
-        }
-
-        function procesarMensaje(mensaje) {
-            const menu = menuData[currentMenu];
-            const entrada = mensaje.trim();
-
-            if (!menu.opciones[entrada]) {
-                showMessage(`❌ Opción no válida: "${entrada}"\n\n${menu.contenido}`, false);
-                return;
-            }
-
-            const opcion = menu.opciones[entrada];
-
-            if (opcion.tipo === "navegacion") {
-                // Navegar a nuevo menú
-                currentMenu = opcion.siguiente;
-                menuHistory.push(currentMenu);
-                const nuevoMenu = menuData[currentMenu];
-                showMessage(nuevoMenu.contenido, false);
-
-            } else if (opcion.tipo === "accion") {
-                // Ejecutar acción
-                ejecutarAccion(opcion.nombre, opcion.valor);
-            }
-        }
-
-        function ejecutarAccion(accion, valor) {
-            switch (accion) {
-                case 'mostrar_todas':
-                    mostrarTodasPropiedades();
-                    break;
-                case 'ayuda':
-                    mostrarAyuda();
-                    break;
-                case 'salir':
-                    showMessage("👋 ¡Gracias por usar Dante Propiedades!\n\n💬 Escribe 'Hola' para comenzar de nuevo.", false);
-                    break;
-                case 'filtrar_tipo':
-                    filtrarPorTipo(valor);
-                    break;
-                case 'buscar_barrio':
-                    mostrarBarrios();
-                    break;
-                case 'buscar_precio':
-                    mostrarRangosPrecios();
-                    break;
-            }
-        }
-
-        function mostrarTodasPropiedades() {
-            if (propiedades.length === 0) {
-                showMessage("❌ No hay propiedades cargadas.", false);
-                return;
-            }
-
-            let contenido = `🏠 <strong>Todas las Propiedades (${propiedades.length}):</strong>\n\n`;
-            
-            propiedades.forEach((prop, index) => {
-                const precio = prop.precio ? `$${prop.precio.toLocaleString()} ${prop.moneda_precio || 'USD'}` : 'Consultar precio';
-                contenido += `${index + 1}. ${prop.titulo}\n   📍 ${prop.barrio} | ${precio}\n   🏠 ${prop.tipo} | ${prop.ambientes || 1} ambientes\n\n`;
-            });
-
-            showMessage(contenido, false);
-            // Volver al menú principal
-            setTimeout(() => {
-                showMessage(menuData.principal.contenido, false);
-            }, 1000);
-        }
-
-        function filtrarPorTipo(tipo) {
-            const filtradas = propiedades.filter(p => 
-                p.tipo.toLowerCase() === tipo.toLowerCase()
-            );
-
-            if (filtradas.length === 0) {
-                showMessage(`❌ No encontré propiedades de tipo "${tipo}"`, false);
-            } else {
-                let contenido = `🏠 <strong>${tipo.charAt(0).toUpperCase() + tipo.slice(1)} (${filtradas.length}):</strong>\n\n`;
-                
-                filtradas.forEach((prop, index) => {
-                    const precio = prop.precio ? `$${prop.precio.toLocaleString()} ${prop.moneda_precio || 'USD'}` : 'Consultar precio';
-                    contenido += `${index + 1}. ${prop.titulo}\n   📍 ${prop.barrio} | ${precio}\n   🏠 ${prop.tipo} | ${prop.ambientes || 1} ambientes\n\n`;
-                });
-
-                showMessage(contenido, false);
-            }
-
-            // Mostrar menú de tipos nuevamente
-            setTimeout(() => {
-                showMessage(menuData.tipos.contenido, false);
-            }, 2000);
-        }
-
-        function mostrarAyuda() {
-            const ayuda = `
-❓ <strong>AYUDA DEL SISTEMA MODULAR</strong>
-
-🔢 <strong>NAVEGACIÓN NUMÉRICA:</strong>
-• Usa SOLO números para navegar (1, 2, 3, 0)
-• '0' siempre te lleva al menú anterior
-• Los menús se generan dinámicamente
-
-🎯 <strong>FLUJO DE NAVEGACIÓN:</strong>
-1. Menú Principal → Búsqueda → Tipos → Casas
-2. En cualquier punto: '0' para volver atrás
-3. '2' en menú principal para ver todas las propiedades
-
-💡 <strong>EJEMPLOS:</strong>
-• "1" → Buscar propiedad
-• "1" → Tipos de propiedad
-• "1" → Casas
-• "0" → Volver al menú anterior
-            `;
-            showMessage(ayuda, false);
-        }
-
-        function mostrarBarrios() {
-            const barrios = [...new Set(propiedades.map(p => p.barrio))].sort();
-            let contenido = `📍 <strong>Barrios Disponibles:</strong>\n\n`;
-            
-            barrios.forEach((barrio, index) => {
-                const count = propiedades.filter(p => p.barrio === barrio).length;
-                contenido += `${index + 1}. ${barrio} (${count} propiedades)\n`;
-            });
-            
-            contenido += `\n💡 Escribe el número del barrio deseado\n0. Volver al menú de búsqueda`;
-            showMessage(contenido, false);
-        }
-
-        function mostrarRangosPrecios() {
-            const contenido = `
-💰 <strong>Rangos de Precio:</strong>
-1. Hasta $100,000 USD
-2. $100,000 - $300,000 USD  
-3. $300,000 - $500,000 USD
-4. Más de $500,000 USD
-
-💡 Escribe el número del rango deseado
-0. Volver al menú de búsqueda
-            `;
-            showMessage(contenido, false);
-        }
-
-        function showMessage(text, isUser = false) {
-            const chatContainer = document.getElementById('chatContainer');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            // Mostrar mensaje del usuario
-            showMessage(message, true);
-            input.value = '';
-            
-            // Procesar mensaje después de un breve delay
-            setTimeout(() => {
-                procesarMensaje(message);
-            }, 500);
-        }
-
-        // Manejar Enter key
-        document.getElementById('messageInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        // Inicializar sistema cuando se carga la página
-        window.onload = function() {
-            loadProperties();
-            document.getElementById('messageInput').focus();
-        };
-    </script>
+    <!-- Scripts -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/property-manager.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script src="js/menu-system.js"></script>
+    <script src="js/gallery.js"></script>
+    <script src="js/favorites.js"></script>
+    <script src="js/app.js"></script>
 </body>
-</html>
