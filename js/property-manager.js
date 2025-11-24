@@ -62,6 +62,12 @@ class PropertyManager {
             
             ConfigUtils.info(`Propiedades cargadas: ${this.properties.length}`);
             
+            // Generar filtros disponibles ANTES de poblar el DOM
+            this.generateAvailableFilters();
+            
+            // Poblar filtros automáticamente
+            this.populateFiltersAfterLoad();
+            
             // Notificar que las propiedades han sido cargadas
             this.notifyPropertiesLoaded();
             
@@ -400,116 +406,113 @@ class PropertyManager {
         return filters;
     }
 
-    // ===== NUEVAS FUNCIONES INTEGRADAS DESDE APP.JS =====
+    // ===== FUNCIONES DINÁMICAS INTEGRADAS DESDE APP.JS =====
     
-    // Sistema dinámico de propiedades (integrado desde app.js)
-    DynamicPropertySystem: {
-        // Inicializar sistema dinámico
-        async initialize() {
-            try {
-                await this.loadProperties();
-                this.generateDynamicData();
-                ConfigUtils.info('Sistema dinámico inicializado correctamente');
-                return true;
-            } catch (error) {
-                ConfigUtils.error('Error inicializando sistema dinámico:', error);
-                return false;
-            }
-        },
-
-        // Generar datos dinámicos
-        generateDynamicData() {
-            this.generateDynamicTypes();
-            this.generateDynamicNeighborhoods();
-            this.generateDynamicOperations();
-            this.generateDynamicAmenities();
-            this.generateAvailableImages();
-        },
-
-        // Generar tipos dinámicamente
-        generateDynamicTypes() {
-            const tipos = [...new Set(this.properties.map(p => p.tipo))];
-            this.dynamicTypes = tipos.map(tipo => ({
-                value: tipo,
-                label: tipo.charAt(0).toUpperCase() + tipo.slice(1),
-                images: this.getImagesForType(tipo)
-            }));
-        },
-
-        // Generar barrios dinámicamente
-        generateDynamicNeighborhoods() {
-            this.dynamicNeighborhoods = [...new Set(
-                this.properties.map(p => p.barrio)
-            )].sort();
-        },
-
-        // Generar operaciones dinámicamente
-        generateDynamicOperations() {
-            this.dynamicOperations = [...new Set(
-                this.properties.map(p => p.operacion)
-            )];
-        },
-
-        // Generar amenidades dinámicamente
-        generateDynamicAmenities() {
-            const amenities = new Set();
-            
-            this.properties.forEach(property => {
-                if (property.pileta === 'Si') amenities.add('pileta');
-                if (property.cochera === 'x') amenities.add('cochera');
-                if (property.balcon === 'x') amenities.add('balcon');
-                if (property.aire_acondicionado === 'Si') amenities.add('aire_acondicionado');
-                if (property.acepta_mascotas === 'Si') amenities.add('acepta_mascotas');
-            });
-            
-            this.dynamicAmenities = Array.from(amenities);
-        },
-
-        // Generar imágenes disponibles
-        generateAvailableImages() {
-            const images = new Set();
-            
-            this.properties.forEach(property => {
-                if (property.fotos && Array.isArray(property.fotos)) {
-                    property.fotos.forEach(foto => images.add(foto));
-                }
-            });
-            
-            this.availableImages = Array.from(images);
-        },
-
-        // Obtener imágenes para un tipo específico
-        getImagesForType(tipo) {
-            const propiedadesDelTipo = this.properties.filter(p => p.tipo === tipo);
-            const images = [];
-            
-            propiedadesDelTipo.forEach(property => {
-                if (property.fotos && Array.isArray(property.fotos)) {
-                    property.fotos.forEach(foto => images.push(foto));
-                }
-            });
-            
-            // Si no hay imágenes específicas, usar genéricas
-            if (images.length === 0) {
-                return this.generateGenericImages(tipo);
-            }
-            
-            return images;
-        },
-
-        // Generar imágenes genéricas para tipos
-        generateGenericImages(tipo) {
-            const genericImages = {
-                casa: ['imgs/casa_familiar_3.jpg', 'imgs/casa_familiar_6.jpg', 'imgs/casa_familiar_8.jpg'],
-                departamento: ['imgs/departamento_palermo_1.jpg', 'imgs/departamento_palermo_4.jpg', 'imgs/departamento_palermo_7.jpg'],
-                monoambiente: ['imgs/monoambiente_1.jpg', 'imgs/monoambiente_3.jpg', 'imgs/monoambiente_8.JPEG'],
-                apartamento: ['imgs/apartamento_lujo_0.jpg', 'imgs/apartamento_lujo_2.jpg', 'imgs/apartamento_lujo_7.jpg'],
-                edificio: ['imgs/edificio_1.jpg', 'imgs/edificio_7.jpg', 'imgs/edificio_8.jpg']
-            };
-            
-            return genericImages[tipo] || ['imgs/imagen-propiedad.svg'];
+    // Inicializar sistema dinámico
+    async initializeDynamic() {
+        try {
+            await this.loadProperties();
+            this.generateDynamicData();
+            ConfigUtils.info('Sistema dinámico inicializado correctamente');
+            return true;
+        } catch (error) {
+            ConfigUtils.error('Error inicializando sistema dinámico:', error);
+            return false;
         }
-    },
+    }
+
+    // Generar datos dinámicos
+    generateDynamicData() {
+        this.generateDynamicTypes();
+        this.generateDynamicNeighborhoods();
+        this.generateDynamicOperations();
+        this.generateDynamicAmenities();
+        this.generateAvailableImages();
+    }
+
+    // Generar tipos dinámicamente
+    generateDynamicTypes() {
+        const tipos = [...new Set(this.properties.map(p => p.tipo))];
+        this.dynamicTypes = tipos.map(tipo => ({
+            value: tipo,
+            label: tipo.charAt(0).toUpperCase() + tipo.slice(1),
+            images: this.getImagesForType(tipo)
+        }));
+    }
+
+    // Generar barrios dinámicamente
+    generateDynamicNeighborhoods() {
+        this.dynamicNeighborhoods = [...new Set(
+            this.properties.map(p => p.barrio)
+        )].sort();
+    }
+
+    // Generar operaciones dinámicamente
+    generateDynamicOperations() {
+        this.dynamicOperations = [...new Set(
+            this.properties.map(p => p.operacion)
+        )];
+    }
+
+    // Generar amenidades dinámicamente
+    generateDynamicAmenities() {
+        const amenities = new Set();
+        
+        this.properties.forEach(property => {
+            if (property.pileta === 'Si') amenities.add('pileta');
+            if (property.cochera === 'x') amenities.add('cochera');
+            if (property.balcon === 'x') amenities.add('balcon');
+            if (property.aire_acondicionado === 'Si') amenities.add('aire_acondicionado');
+            if (property.acepta_mascotas === 'Si') amenities.add('acepta_mascotas');
+        });
+        
+        this.dynamicAmenities = Array.from(amenities);
+    }
+
+    // Generar imágenes disponibles
+    generateAvailableImages() {
+        const images = new Set();
+        
+        this.properties.forEach(property => {
+            if (property.fotos && Array.isArray(property.fotos)) {
+                property.fotos.forEach(foto => images.add(foto));
+            }
+        });
+        
+        this.availableImages = Array.from(images);
+    }
+
+    // Obtener imágenes para un tipo específico
+    getImagesForType(tipo) {
+        const propiedadesDelTipo = this.properties.filter(p => p.tipo === tipo);
+        const images = [];
+        
+        propiedadesDelTipo.forEach(property => {
+            if (property.fotos && Array.isArray(property.fotos)) {
+                property.fotos.forEach(foto => images.push(foto));
+            }
+        });
+        
+        // Si no hay imágenes específicas, usar genéricas
+        if (images.length === 0) {
+            return this.generateGenericImages(tipo);
+        }
+        
+        return images;
+    }
+
+    // Generar imágenes genéricas para tipos
+    generateGenericImages(tipo) {
+        const genericImages = {
+            casa: ['imgs/casa_familiar_3.jpg', 'imgs/casa_familiar_6.jpg', 'imgs/casa_familiar_8.jpg'],
+            departamento: ['imgs/departamento_palermo_1.jpg', 'imgs/departamento_palermo_4.jpg', 'imgs/departamento_palermo_7.jpg'],
+            monoambiente: ['imgs/monoambiente_1.jpg', 'imgs/monoambiente_3.jpg', 'imgs/monoambiente_8.JPEG'],
+            apartamento: ['imgs/apartamento_lujo_0.jpg', 'imgs/apartamento_lujo_2.jpg', 'imgs/apartamento_lujo_7.jpg'],
+            edificio: ['imgs/edificio_1.jpg', 'imgs/edificio_7.jpg', 'imgs/edificio_8.jpg']
+        };
+        
+        return genericImages[tipo] || ['imgs/imagen-propiedad.svg'];
+    }
 
     // Función hash para consistencia en selección de imágenes
     getHashCode(str) {
@@ -521,7 +524,7 @@ class PropertyManager {
             hash = hash & hash; // Convert to 32bit integer
         }
         return hash;
-    },
+    }
 
     // Obtener imagen principal de propiedad (mejorada)
     getPropertyMainImage(property) {
@@ -534,7 +537,7 @@ class PropertyManager {
         }
         
         // Segunda opción: buscar imágenes del mismo tipo
-        const imagesOfType = this.DynamicPropertySystem.getImagesForType(property.tipo);
+        const imagesOfType = this.getImagesForType(property.tipo);
         if (imagesOfType.length > 0) {
             const index = Math.abs(this.getHashCode(property.id_temporal)) % imagesOfType.length;
             return imagesOfType[index];
@@ -542,7 +545,7 @@ class PropertyManager {
         
         // Tercera opción: imagen por defecto
         return AppConfig.properties.defaultImage;
-    },
+    }
 
     // Crear HTML de imagen de propiedad
     createPropertyImageHTML(property) {
@@ -557,7 +560,7 @@ class PropertyManager {
                      loading="lazy">
             </div>
         `;
-    },
+    }
 
     // Crear tarjeta completa de propiedad (mejorada)
     createPropertyCard(property) {
@@ -615,13 +618,13 @@ class PropertyManager {
                 </div>
             </div>
         `;
-    },
+    }
 
     // Llenar filtros dinámicamente
     populateDynamicFilters() {
         this.populateNeighborhoodSelector();
         this.populateTypeSelector();
-    },
+    }
 
     // Llenar selector de barrios
     populateNeighborhoodSelector() {
@@ -640,7 +643,7 @@ class PropertyManager {
             option.textContent = barrio;
             neighborhoodSelect.appendChild(option);
         });
-    },
+    }
 
     // Llenar selector de tipos
     populateTypeSelector() {
@@ -659,7 +662,26 @@ class PropertyManager {
             option.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
             typeSelect.appendChild(option);
         });
-    },
+    }
+
+    // Llenar selector de operaciones
+    populateOperationSelector() {
+        const operationSelect = document.getElementById('operacion-select');
+        if (!operationSelect) return;
+        
+        // Limpiar opciones existentes excepto la primera
+        while (operationSelect.children.length > 1) {
+            operationSelect.removeChild(operationSelect.lastChild);
+        }
+        
+        // Agregar opciones dinámicas
+        this.availableFilters.operaciones.forEach(operacion => {
+            const option = document.createElement('option');
+            option.value = operacion;
+            option.textContent = operacion.charAt(0).toUpperCase() + operacion.slice(1);
+            operationSelect.appendChild(option);
+        });
+    }
 
     // Obtener propiedades filtradas (mejorada)
     getFilteredProperties(filters) {
@@ -773,6 +795,31 @@ class PropertyManager {
     // Verificar si está cargando
     getLoadingState() {
         return this.isLoading;
+    }
+
+    // Poblar filtros automáticamente después de cargar
+    populateFiltersAfterLoad() {
+        ConfigUtils.debug('Poblando filtros automáticamente...');
+        
+        // Poblar selector de barrios
+        this.populateNeighborhoodSelector();
+        
+        // Poblar selector de tipos
+        this.populateTypeSelector();
+        
+        // Poblar selector de operaciones
+        this.populateOperationSelector();
+        
+        // Notificar que los filtros están listos
+        const event = new CustomEvent('filtersPopulated', {
+            detail: {
+                filters: this.availableFilters,
+                timestamp: Date.now()
+            }
+        });
+        window.dispatchEvent(event);
+        
+        ConfigUtils.info('Filtros poblados automáticamente');
     }
 
     // Obtener tiempo de última carga
