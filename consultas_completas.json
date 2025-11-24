@@ -15,5 +15,21 @@
         "moneda_precio": "ARS"
       }
     ]
+  },
+  {
+    "id": "CONS_20251124_211200",
+    "fecha": "2025-11-24T21:12:00.625748",
+    "nombre": "Test Usuario",
+    "telefono": "123456789",
+    "email": "test@test.com",
+    "propiedades_interes": []
+  },
+  {
+    "id": "CONS_20251124_212532",
+    "fecha": "2025-11-24T21:25:32.338433",
+    "nombre": "Usuario Test Final",
+    "telefono": "+54 9 11 9876-5432",
+    "email": "usuario@final.com",
+    "propiedades_interes": []
   }
 ]
